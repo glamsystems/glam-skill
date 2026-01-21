@@ -1,0 +1,92 @@
+{
+  "evaluations": [
+    {
+      "name": "basic-vault-creation",
+      "description": "Create a vault and enable integrations",
+      "prompt": "Help me create a new GLAM vault called 'My Treasury' with SOL and USDC as assets, then enable Jupiter swap integration.",
+      "expectedBehaviors": [
+        "Uses glam vault create command with --name flag",
+        "Includes --assets flag with SOL and USDC mint addresses",
+        "Uses glam integrations enable command for JupiterSwap",
+        "Provides vault address after creation"
+      ],
+      "tags": ["basic", "vault", "cli"]
+    },
+    {
+      "name": "token-swap-jupiter",
+      "description": "Swap tokens using Jupiter integration",
+      "prompt": "I have a GLAM vault at address ABC123. I want to swap 500 USDC to SOL with 1% slippage tolerance.",
+      "expectedBehaviors": [
+        "Uses glam jupiter swap command",
+        "Specifies --input-mint with USDC address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "Specifies --output-mint with SOL address So11111111111111111111111111111111111111112",
+        "Uses --amount 500",
+        "Uses --slippage 100 (100 basis points = 1%)"
+      ],
+      "tags": ["intermediate", "jupiter", "swap", "cli"]
+    },
+    {
+      "name": "delegate-setup",
+      "description": "Set up delegate permissions for trading",
+      "prompt": "Configure my vault at address VAULT123 to allow wallet TRADER456 to perform swaps and Drift trading operations.",
+      "expectedBehaviors": [
+        "Uses glam delegates grant command",
+        "Includes Swap permission",
+        "Includes Drift-related permissions (DriftDeposit, DriftWithdraw, DriftPlaceOrders, etc.)",
+        "Uses --permissions flag with comma-separated values"
+      ],
+      "tags": ["intermediate", "delegates", "access-control", "cli"]
+    },
+    {
+      "name": "tokenized-vault-workflow",
+      "description": "Create a tokenized vault with share class",
+      "prompt": "Create a tokenized investment vault named 'Alpha Fund' with share token symbol 'ALPHA', enable Jupiter and Kamino integrations, and set up a trading delegate.",
+      "expectedBehaviors": [
+        "Uses glam vault create with --share-class-name and --share-class-symbol flags",
+        "Enables JupiterSwap integration",
+        "Enables KaminoLend integration",
+        "Uses glam delegates grant for setting up delegate",
+        "Explains the subscription/redemption workflow"
+      ],
+      "tags": ["advanced", "tokenized", "workflow", "cli"]
+    },
+    {
+      "name": "kamino-lending-deposit",
+      "description": "Deposit assets to Kamino lending market",
+      "prompt": "I want to deposit 1000 USDC from my vault at VAULT_ADDR to Kamino lending to earn yield.",
+      "expectedBehaviors": [
+        "Checks if KaminoLend integration is enabled",
+        "Uses glam kamino init if not already initialized",
+        "Uses glam kamino deposit with correct market address",
+        "Specifies --mint with USDC address",
+        "Specifies --amount 1000"
+      ],
+      "tags": ["intermediate", "kamino", "lending", "cli"]
+    },
+    {
+      "name": "sdk-vault-creation",
+      "description": "Create vault using TypeScript SDK",
+      "prompt": "Show me how to create a GLAM vault programmatically using the TypeScript SDK with SOL and USDC assets.",
+      "expectedBehaviors": [
+        "Imports GlamClient from @glamsystems/glam-sdk",
+        "Creates GlamClient instance with keypair or wallet",
+        "Calls client.vault.create() with name and assets array",
+        "Shows how to get vault PDA from result",
+        "Uses PublicKey for mint addresses"
+      ],
+      "tags": ["basic", "sdk", "typescript"]
+    },
+    {
+      "name": "drift-perp-trading",
+      "description": "Open perpetual position on Drift",
+      "prompt": "Initialize Drift for my vault VAULT123, deposit 2000 USDC as collateral, and open a 5 SOL long perpetual position.",
+      "expectedBehaviors": [
+        "Enables DriftProtocol integration if needed",
+        "Uses glam drift init-user command",
+        "Uses glam drift deposit with --market-index 0 --amount 2000",
+        "Uses glam drift perp with --market-index 0 --amount 5 --direction long"
+      ],
+      "tags": ["advanced", "drift", "perpetuals", "cli"]
+    }
+  ]
+}
