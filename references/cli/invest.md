@@ -48,6 +48,14 @@ Claim processed redemption proceeds.
 glam invest claim-redemption <VAULT_ADDRESS> --share-class <INDEX>
 ```
 
+### `glam invest cancel-request`
+
+Cancel a pending subscription or redemption request.
+
+```bash
+glam invest cancel-request <VAULT_ADDRESS> --share-class <INDEX>
+```
+
 ---
 
 ## Manager Commands

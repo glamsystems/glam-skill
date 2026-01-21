@@ -83,6 +83,14 @@ Add token to swap allowlist.
 glam jupiter allowlist-token <VAULT_ADDRESS> <MINT_ADDRESS>
 ```
 
+### `glam jupiter remove-token`
+
+Remove a token from the swap allowlist.
+
+```bash
+glam jupiter remove-token <VAULT_ADDRESS> <MINT_ADDRESS>
+```
+
 ### `glam jupiter clear-allowlist`
 
 Clear all tokens from the swap allowlist.
