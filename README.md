@@ -26,7 +26,7 @@ This skill enables Claude Code to help you:
 
 ## Resources
 
-- [GLAM Documentation](https://glam.systems/docs)
+- [Documentation](https://docs.glam.systems/)
 - [GitHub](https://github.com/glamsystems)
-- [NPM CLI](https://www.npmjs.com/package/@glamsystems/glam-cli)
-- [NPM SDK](https://www.npmjs.com/package/@glamsystems/glam-sdk)
+- [CLI](https://www.npmjs.com/package/@glamsystems/glam-cli)
+- [SDK](https://www.npmjs.com/package/@glamsystems/glam-sdk)
