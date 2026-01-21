@@ -13,9 +13,13 @@ GLAM provides programmable investment infrastructure on Solana: vaults with acce
 # Install CLI
 npm install -g @glamsystems/glam-cli
 
-# Configure (via environment file)
-export KEYPAIR_PATH=~/.config/solana/id.json
-# Or create .env file with KEYPAIR_PATH, RPC_URL, etc.
+# Configure (create ~/.config/glam/config.json)
+cat > ~/.config/glam/config.json << 'EOF'
+{
+  "keypair_path": "~/.config/solana/id.json",
+  "json_rpc_url": "https://api.mainnet-beta.solana.com"
+}
+EOF
 
 # Create vault
 glam vault create --name "My Vault"

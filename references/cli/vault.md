@@ -2,33 +2,36 @@
 
 ## Configuration
 
-The GLAM CLI uses environment variables for configuration. Set these in your shell or in a `.env` file.
+The GLAM CLI uses a JSON configuration file.
+
+### Config File Location
+
+- **Default**: `~/.config/glam/config.json`
+- **Docker**: `/workspace/config.json`
+- **Override**: Use `-C, --config <path>` flag
+
+### Config File Format
+
+```json
+{
+  "keypair_path": "~/.config/solana/id.json",
+  "json_rpc_url": "https://api.mainnet-beta.solana.com",
+  "tx_rpc_url": "https://api.mainnet-beta.solana.com",
+  "cluster": "mainnet-beta",
+  "priority_fee": 10000,
+  "jupiter_api_key": "optional-api-key"
+}
+```
 
 ### `glam env`
 
-Display current environment configuration.
+Display current configuration.
 
 ```bash
 glam env
 ```
 
-**Output shows:** keypair path, RPC URL, cluster, and other configured values.
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `KEYPAIR_PATH` | Path to Solana keypair JSON file | Required |
-| `RPC_URL` | Solana RPC endpoint URL | `https://api.mainnet-beta.solana.com` |
-| `PRIORITY_FEE` | Priority fee in microlamports | `0` |
-| `CLUSTER` | Cluster name: `mainnet-beta`, `devnet`, `localnet` | `mainnet-beta` |
-
-**Example `.env` file:**
-```bash
-KEYPAIR_PATH=~/.config/solana/id.json
-RPC_URL=https://your-rpc-endpoint.com
-PRIORITY_FEE=10000
-```
+**Output shows:** keypair path, RPC URLs, cluster, priority fee, and other configured values.
 
 ---
 

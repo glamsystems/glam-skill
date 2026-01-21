@@ -62,9 +62,14 @@ Error: Keypair file not found at /path/to/keypair.json
 
 **Solution:**
 ```bash
-# Set correct keypair path via environment
-export KEYPAIR_PATH=~/.config/solana/id.json
-# Or add to .env file: KEYPAIR_PATH=~/.config/solana/id.json
+# Create/edit config file
+mkdir -p ~/.config/glam
+cat > ~/.config/glam/config.json << 'EOF'
+{
+  "keypair_path": "~/.config/solana/id.json",
+  "json_rpc_url": "https://api.mainnet-beta.solana.com"
+}
+EOF
 
 # Verify keypair exists
 ls -la ~/.config/solana/id.json
@@ -95,17 +100,17 @@ Error: keypairPath is not configured
 ```
 
 **Solution:**
-Create a `.env` file in your project root:
 ```bash
-# .env file
-KEYPAIR_PATH=~/.config/solana/id.json
-RPC_URL=https://api.mainnet-beta.solana.com
+# Create config file at ~/.config/glam/config.json
+mkdir -p ~/.config/glam
+cat > ~/.config/glam/config.json << 'EOF'
+{
+  "keypair_path": "~/.config/solana/id.json",
+  "json_rpc_url": "https://api.mainnet-beta.solana.com"
+}
+EOF
 
-# Or set environment variables directly:
-export KEYPAIR_PATH=~/.config/solana/id.json
-export RPC_URL=https://api.mainnet-beta.solana.com
-
-# Display current environment setup
+# Verify configuration
 glam env
 ```
 
@@ -160,8 +165,8 @@ Error: Transaction was not confirmed in 60.00 seconds
 # Retry with higher priority fee
 glam jupiter swap <VAULT> ... --priority-fee 50000
 
-# Or use a faster RPC
-glam config set rpcUrl https://your-fast-rpc.com
+# Or use a faster RPC by editing ~/.config/glam/config.json
+# Update json_rpc_url to a faster endpoint
 ```
 
 ### Compute budget exceeded
@@ -249,9 +254,8 @@ Error: 429 Too Many Requests
 
 **Solution:**
 ```bash
-# Use a paid RPC endpoint
-export RPC_URL=https://your-paid-rpc.com
-# Or add to .env file: RPC_URL=https://your-paid-rpc.com
+# Edit ~/.config/glam/config.json and update json_rpc_url to a paid endpoint
+# Or use -C flag: glam -C /path/to/config.json <command>
 
 # Or add delay between commands
 ```
@@ -268,8 +272,7 @@ Error: Connection refused
 # Check current RPC URL
 glam env
 
-# Try a different RPC
-export RPC_URL=https://api.mainnet-beta.solana.com
+# Edit ~/.config/glam/config.json to fix json_rpc_url
 ```
 
 ### Account not found
