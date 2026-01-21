@@ -2,27 +2,33 @@
 
 ## Configuration
 
-### `glam config view`
+The GLAM CLI uses environment variables for configuration. Set these in your shell or in a `.env` file.
 
-Display current configuration.
+### `glam env`
 
-```bash
-glam config view
-```
-
-### `glam config set`
-
-Set a configuration value.
+Display current environment configuration.
 
 ```bash
-glam config set <KEY> <VALUE>
+glam env
 ```
 
-**Keys:**
-- `keypairPath` - Path to Solana keypair JSON file (required)
-- `rpcUrl` - Solana RPC endpoint URL
-- `priorityFee` - Priority fee in microlamports
-- `cluster` - Cluster name: `mainnet-beta`, `devnet`, `localnet`
+**Output shows:** keypair path, RPC URL, cluster, and other configured values.
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `KEYPAIR_PATH` | Path to Solana keypair JSON file | Required |
+| `RPC_URL` | Solana RPC endpoint URL | `https://api.mainnet-beta.solana.com` |
+| `PRIORITY_FEE` | Priority fee in microlamports | `0` |
+| `CLUSTER` | Cluster name: `mainnet-beta`, `devnet`, `localnet` | `mainnet-beta` |
+
+**Example `.env` file:**
+```bash
+KEYPAIR_PATH=~/.config/solana/id.json
+RPC_URL=https://your-rpc-endpoint.com
+PRIORITY_FEE=10000
+```
 
 ---
 
@@ -124,6 +130,46 @@ Add asset to vault allowlist.
 glam vault allowlist-asset <VAULT_ADDRESS> <MINT_ADDRESS>
 ```
 
+### `glam vault list-assets`
+
+List assets in vault allowlist.
+
+```bash
+glam vault list-assets <VAULT_ADDRESS>
+```
+
+### `glam vault remove-asset`
+
+Remove asset from vault allowlist.
+
+```bash
+glam vault remove-asset <VAULT_ADDRESS> <MINT_ADDRESS>
+```
+
+### `glam vault update-owner`
+
+Transfer vault ownership to a new owner.
+
+```bash
+glam vault update-owner <VAULT_ADDRESS> <NEW_OWNER_PUBKEY>
+```
+
+### `glam vault set-enabled`
+
+Enable or disable the vault.
+
+```bash
+glam vault set-enabled <VAULT_ADDRESS> <true|false>
+```
+
+### `glam vault extend`
+
+Extend vault state account size (for additional data storage).
+
+```bash
+glam vault extend <VAULT_ADDRESS> <BYTES>
+```
+
 ### `glam vault close`
 
 Close a vault (must be empty).
@@ -136,12 +182,12 @@ glam vault close <VAULT_ADDRESS>
 
 ## Integration Commands
 
-### `glam integrations list`
+### `glam integration list`
 
 List available integrations.
 
 ```bash
-glam integrations list
+glam integration list
 ```
 
 **Available integrations:**
@@ -158,30 +204,30 @@ glam integrations list
 - `Invariant` - Invariant DEX
 - `Orca` - Orca DEX
 
-### `glam integrations enable`
+### `glam integration enable`
 
 Enable integrations for a vault.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> <INTEGRATION>...
+glam integration enable <VAULT_ADDRESS> <INTEGRATION>...
 ```
 
 **Examples:**
 
 ```bash
 # Enable single integration
-glam integrations enable <VAULT> JupiterSwap
+glam integration enable <VAULT> JupiterSwap
 
 # Enable multiple integrations
-glam integrations enable <VAULT> JupiterSwap DriftProtocol KaminoLend
+glam integration enable <VAULT> JupiterSwap DriftProtocol KaminoLend
 ```
 
-### `glam integrations disable`
+### `glam integration disable`
 
 Disable an integration.
 
 ```bash
-glam integrations disable <VAULT_ADDRESS> <INTEGRATION>
+glam integration disable <VAULT_ADDRESS> <INTEGRATION>
 ```
 
 ---

@@ -13,8 +13,9 @@ GLAM provides programmable investment infrastructure on Solana: vaults with acce
 # Install CLI
 npm install -g @glamsystems/glam-cli
 
-# Configure
-glam config set keypairPath ~/.config/solana/id.json
+# Configure (via environment file)
+export KEYPAIR_PATH=~/.config/solana/id.json
+# Or create .env file with KEYPAIR_PATH, RPC_URL, etc.
 
 # Create vault
 glam vault create --name "My Vault"
@@ -26,10 +27,10 @@ glam vault create --name "My Vault"
 
 ```bash
 # Enable before using
-glam integrations enable <VAULT> JupiterSwap    # Before any swap
-glam integrations enable <VAULT> DriftProtocol  # Before any Drift operation
-glam integrations enable <VAULT> KaminoLend     # Before any Kamino operation
-glam integrations enable <VAULT> MarinadeStaking # Before staking
+glam integration enable <VAULT> JupiterSwap    # Before any swap
+glam integration enable <VAULT> DriftProtocol  # Before any Drift operation
+glam integration enable <VAULT> KaminoLend     # Before any Kamino operation
+glam integration enable <VAULT> MarinadeStaking # Before staking
 ```
 
 Available: `JupiterSwap`, `DriftProtocol`, `KaminoLend`, `KaminoVault`, `KaminoFarm`, `MarinadeStaking`, `NativeStaking`, `SplStakePool`, `SanctumStaking`, `MeteoraDlmm`, `Invariant`, `Orca`.
@@ -54,7 +55,7 @@ glam vault create --name "Treasury" --assets SOL,USDC
 # Save the vault address from output!
 
 # 2. Enable integrations
-glam integrations enable <VAULT> JupiterSwap KaminoLend
+glam integration enable <VAULT> JupiterSwap KaminoLend
 
 # 3. Verify
 glam vault view <VAULT>
@@ -80,7 +81,7 @@ glam vault create --name "Alpha Fund" \
   --assets So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
 # 2. Enable integrations
-glam integrations enable <VAULT> JupiterSwap DriftProtocol KaminoLend
+glam integration enable <VAULT> JupiterSwap DriftProtocol KaminoLend
 
 # 3. Set initial price (1.0 USDC per share)
 glam manage price <VAULT> --share-class 0 --price 1.0
@@ -89,7 +90,7 @@ glam manage price <VAULT> --share-class 0 --price 1.0
 glam jupiter set-max-slippage <VAULT> --max-slippage 100
 
 # 5. Set up trading delegate
-glam delegates grant <VAULT> <TRADER_PUBKEY> --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders
+glam delegate grant <VAULT> <TRADER_PUBKEY> --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders
 
 # 6. Set timelock (24 hours)
 glam timelock set <VAULT> --delay 86400
@@ -107,16 +108,16 @@ Checklist:
 
 ```bash
 # 1. Enable
-glam integrations enable <VAULT> DriftProtocol
+glam integration enable <VAULT> DriftProtocol
 
 # 2. Initialize user (REQUIRED)
-glam drift init-user <VAULT>
+glam drift-protocol init-user <VAULT>
 
 # 3. Deposit USDC as collateral
-glam drift deposit <VAULT> --market-index 0 --amount 1000
+glam drift-protocol deposit <VAULT> --market-index 0 --amount 1000
 
 # 4. Open position
-glam drift perp <VAULT> --market-index 0 --amount 1 --direction long
+glam drift-protocol perp <VAULT> --market-index 0 --amount 1 --direction long
 ```
 
 ### Kamino Lending Setup
@@ -130,13 +131,13 @@ Checklist:
 
 ```bash
 # 1. Enable
-glam integrations enable <VAULT> KaminoLend
+glam integration enable <VAULT> KaminoLend
 
 # 2. Initialize (REQUIRED)
-glam kamino init <VAULT>
+glam kamino-lend init <VAULT>
 
 # 3. Deposit
-glam kamino deposit <VAULT> \
+glam kamino-lend deposit <VAULT> \
   --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
   --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
   --amount 1000
@@ -152,16 +153,16 @@ glam kamino deposit <VAULT> \
 → Enable `JupiterSwap` → `glam jupiter swap`
 
 **Earn yield on idle assets?**
-→ Lending: Enable `KaminoLend` → `glam kamino deposit`
+→ Lending: Enable `KaminoLend` → `glam kamino-lend deposit`
 → Staking: Enable `MarinadeStaking` → `glam marinade stake`
-→ Kamino Vaults: Enable `KaminoVault` → `glam kvaults deposit`
+→ Kamino Vaults: Enable `KaminoVault` → `glam kamino-vaults deposit`
 → Drift Vaults: Enable `DriftVaults` → `glam drift-vaults deposit`
 
 **Trade perpetuals?**
-→ Enable `DriftProtocol` → `glam drift init-user` → `glam drift deposit` → `glam drift perp`
+→ Enable `DriftProtocol` → `glam drift-protocol init-user` → `glam drift-protocol deposit` → `glam drift-protocol perp`
 
 **Trade spot on Drift?**
-→ Enable `DriftProtocol` → `glam drift init-user` → `glam drift deposit` → `glam drift spot`
+→ Enable `DriftProtocol` → `glam drift-protocol init-user` → `glam drift-protocol deposit` → `glam drift-protocol spot`
 
 **Create tokenized vault with investors?**
 → `vault create --share-class-*` → `manage price` → investors use `invest subscribe`
@@ -198,13 +199,13 @@ glam vault balances <VAULT>
 
 ### After Drift Trade
 ```bash
-glam drift list-positions <VAULT>
+glam drift-protocol list-positions <VAULT>
 # Check: position appears
 ```
 
 ### After Kamino Deposit
 ```bash
-glam kamino list <VAULT>
+glam kamino-lend list <VAULT>
 # Check: position appears
 ```
 
@@ -215,9 +216,9 @@ glam kamino list <VAULT>
 | Error | Cause | Solution |
 |-------|-------|----------|
 | "Signer is not authorized" | Wrong keypair or missing delegate permission | Check `vault view` for manager; grant delegate if needed |
-| "Integration not enabled" | Forgot to enable | `glam integrations enable <VAULT> <INTEGRATION>` |
+| "Integration not enabled" | Forgot to enable | `glam integration enable <VAULT> <INTEGRATION>` |
 | "Asset not in allowlist" | Token not in vault allowlist | `glam vault allowlist-asset <VAULT> <MINT>` |
-| "User not initialized" | Drift/Kamino not initialized | Run `glam drift init-user` or `glam kamino init` |
+| "User not initialized" | Drift/Kamino not initialized | Run `glam drift-protocol init-user` or `glam kamino-lend init` |
 | "No route found" | Jupiter can't find swap path | Try smaller amount; check token liquidity |
 | "Slippage exceeded" | Price moved too much | Increase `--slippage` or reduce amount |
 | "Insufficient collateral" | Not enough collateral for position | Deposit more via `drift deposit` |
@@ -271,10 +272,10 @@ await client.jupiterSwap.swap(vaultPda, {
 
 ### CLI Commands (by domain)
 - [Vault & Config](./references/cli/vault.md) - Vault creation, configuration, integrations
-- [Delegates](./references/cli/delegates.md) - Access control and permissions
+- [Delegate](./references/cli/delegate.md) - Access control and permissions
 - [Jupiter](./references/cli/jupiter.md) - Token swaps
-- [Drift](./references/cli/drift.md) - Perpetuals and spot trading
-- [Kamino](./references/cli/kamino.md) - Lending and borrowing
+- [Drift Protocol](./references/cli/drift-protocol.md) - Perpetuals and spot trading
+- [Kamino Lend](./references/cli/kamino-lend.md) - Lending and borrowing
 - [Kamino Vaults](./references/cli/kamino-vaults.md) - Automated yield vaults
 - [Kamino Farms](./references/cli/kamino-farms.md) - Liquidity mining rewards
 - [Drift Vaults](./references/cli/drift-vaults.md) - Managed Drift vaults

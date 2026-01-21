@@ -46,6 +46,7 @@ const client = new GlamClient({
 ```typescript
 // Sub-clients (lazy-loaded)
 client.vault          // Vault operations
+client.state          // Vault state account management
 client.access         // Delegate/permission management
 client.jupiterSwap    // Jupiter swap operations
 client.drift          // Drift protocol operations
@@ -61,6 +62,7 @@ client.fees           // Fee management
 client.price          // NAV pricing operations
 client.mint           // Share class mint operations
 client.timelock       // Timelock operations
+client.cctp           // Cross-chain USDC bridging
 
 // Core properties
 client.program        // Anchor program instance
@@ -161,6 +163,86 @@ type Integration =
   | "MeteoraDlmm"
   | "Invariant"
   | "Orca";
+```
+
+---
+
+## State Operations
+
+Access via `client.state`.
+
+### initialize
+
+```typescript
+const { statePda, txId } = await client.state.initialize({
+  name: string;
+  manager?: PublicKey;
+  // ... additional state params
+}, options?: TxOptions);
+```
+
+### update
+
+```typescript
+await client.state.update(vaultPda: PublicKey, {
+  name?: string;
+  uri?: string;
+  // ... additional fields
+}, options?: TxOptions);
+```
+
+### extend
+
+```typescript
+await client.state.extend(vaultPda: PublicKey, newBytes: number, options?: TxOptions);
+```
+
+### close
+
+```typescript
+await client.state.close(vaultPda: PublicKey, options?: TxOptions);
+```
+
+---
+
+## CCTP Operations (Cross-Chain)
+
+Access via `client.cctp`.
+
+### bridgeUsdc
+
+```typescript
+const txId = await client.cctp.bridgeUsdc(vaultPda: PublicKey, {
+  amount: BN;
+  destinationDomain: number;
+  recipient: string; // Hex address
+}, options?: TxOptions);
+```
+
+### receiveUsdc
+
+```typescript
+const txId = await client.cctp.receiveUsdc(vaultPda: PublicKey, {
+  sourceDomain: number;
+  message: Buffer;
+  attestation: Buffer;
+}, options?: TxOptions);
+```
+
+### getIncomingBridgeEvents
+
+```typescript
+const events = await client.cctp.getIncomingBridgeEvents(vaultPda: PublicKey, {
+  limit?: number;
+});
+```
+
+### getOutgoingBridgeEvents
+
+```typescript
+const events = await client.cctp.getOutgoingBridgeEvents(vaultPda: PublicKey, {
+  limit?: number;
+});
 ```
 
 ---

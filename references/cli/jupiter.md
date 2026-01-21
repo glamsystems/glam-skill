@@ -5,7 +5,7 @@ Token swaps via Jupiter aggregator.
 **Prerequisite:** Enable `JupiterSwap` integration before using these commands.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> JupiterSwap
+glam integration enable <VAULT_ADDRESS> JupiterSwap
 ```
 
 ## Commands
@@ -81,6 +81,14 @@ Add token to swap allowlist.
 
 ```bash
 glam jupiter allowlist-token <VAULT_ADDRESS> <MINT_ADDRESS>
+```
+
+### `glam jupiter clear-allowlist`
+
+Clear all tokens from the swap allowlist.
+
+```bash
+glam jupiter clear-allowlist <VAULT_ADDRESS>
 ```
 
 ---

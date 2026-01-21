@@ -1,15 +1,15 @@
-# CLI: Delegate Commands
+# CLI: Delegate Commands (`glam delegate`)
 
 Manage access control and delegate permissions for vaults.
 
 ## Commands
 
-### `glam delegates grant`
+### `glam delegate grant`
 
 Grant delegate permissions.
 
 ```bash
-glam delegates grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> --permissions <PERMS>
+glam delegate grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> --permissions <PERMS>
 ```
 
 **Options:**
@@ -47,37 +47,37 @@ glam delegates grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> --permissions <PERMS>
 
 ```bash
 # Grant swap and staking permissions
-glam delegates grant <VAULT> <DELEGATE> --permissions Swap,Stake,Unstake
+glam delegate grant <VAULT> <DELEGATE> --permissions Swap,Stake,Unstake
 
 # Grant Drift trading permissions
-glam delegates grant <VAULT> <DELEGATE> --permissions DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftPerpMarket
+glam delegate grant <VAULT> <DELEGATE> --permissions DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftPerpMarket
 
 # Grant Kamino lending permissions
-glam delegates grant <VAULT> <DELEGATE> --permissions KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
+glam delegate grant <VAULT> <DELEGATE> --permissions KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
 ```
 
-### `glam delegates list`
+### `glam delegate list`
 
 List vault delegates and their permissions.
 
 ```bash
-glam delegates list <VAULT_ADDRESS>
+glam delegate list <VAULT_ADDRESS>
 ```
 
-### `glam delegates revoke`
+### `glam delegate revoke`
 
 Revoke a specific delegate's permissions.
 
 ```bash
-glam delegates revoke <VAULT_ADDRESS> <DELEGATE_PUBKEY>
+glam delegate revoke <VAULT_ADDRESS> <DELEGATE_PUBKEY>
 ```
 
-### `glam delegates revoke-all`
+### `glam delegate revoke-all`
 
 Revoke all delegates.
 
 ```bash
-glam delegates revoke-all <VAULT_ADDRESS>
+glam delegate revoke-all <VAULT_ADDRESS>
 ```
 
 ---
@@ -88,7 +88,7 @@ glam delegates revoke-all <VAULT_ADDRESS>
 
 ```bash
 # Full Drift trading permissions
-glam delegates grant <VAULT> <TRADER> \
+glam delegate grant <VAULT> <TRADER> \
   --permissions Swap,DriftInit,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftCancelOrders,DriftPerpMarket,DriftSpotMarket
 ```
 
@@ -96,7 +96,7 @@ glam delegates grant <VAULT> <TRADER> \
 
 ```bash
 # Kamino lending permissions
-glam delegates grant <VAULT> <MANAGER> \
+glam delegate grant <VAULT> <MANAGER> \
   --permissions KaminoInit,KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
 ```
 
@@ -104,6 +104,6 @@ glam delegates grant <VAULT> <MANAGER> \
 
 ```bash
 # Staking permissions
-glam delegates grant <VAULT> <STAKER> \
+glam delegate grant <VAULT> <STAKER> \
   --permissions Stake,Unstake,LiquidUnstake
 ```

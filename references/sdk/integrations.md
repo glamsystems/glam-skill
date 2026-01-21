@@ -37,6 +37,33 @@ const delegates = await client.access.listDelegates(vaultPda: PublicKey);
 // Returns: { pubkey: PublicKey, permissions: Permission[] }[]
 ```
 
+### emergencyAccessUpdate
+
+```typescript
+await client.access.emergencyAccessUpdate(vaultPda: PublicKey, {
+  newManager?: PublicKey;
+  clearDelegates?: boolean;
+}, options?: TxOptions);
+```
+
+### enableProtocols
+
+```typescript
+await client.access.enableProtocols(vaultPda: PublicKey, integrationProgram: PublicKey, protocolBitmask: number, options?: TxOptions);
+```
+
+### disableProtocols
+
+```typescript
+await client.access.disableProtocols(vaultPda: PublicKey, integrationProgram: PublicKey, protocolBitmask: number, options?: TxOptions);
+```
+
+### setProtocolPolicy
+
+```typescript
+await client.access.setProtocolPolicy(vaultPda: PublicKey, integrationProgram: PublicKey, protocolBitflag: number, data: Buffer, options?: TxOptions);
+```
+
 ---
 
 ## Jupiter Swap
@@ -140,6 +167,49 @@ await client.drift.cancelOrder(vaultPda: PublicKey, orderId: number, options?: T
 
 ```typescript
 const positions = await client.drift.getPositions(vaultPda: PublicKey);
+```
+
+### updateUserCustomMarginRatio
+
+```typescript
+await client.drift.updateUserCustomMarginRatio(vaultPda: PublicKey, marginRatio: number, options?: TxOptions);
+```
+
+### updateUserMarginTradingEnabled
+
+```typescript
+await client.drift.updateUserMarginTradingEnabled(vaultPda: PublicKey, enabled: boolean, options?: TxOptions);
+```
+
+### updateUserDelegate
+
+```typescript
+await client.drift.updateUserDelegate(vaultPda: PublicKey, delegate: PublicKey, options?: TxOptions);
+```
+
+### modifyOrder
+
+```typescript
+await client.drift.modifyOrder(vaultPda: PublicKey, {
+  orderId: number;
+  newAmount?: BN;
+  newPrice?: BN;
+  // ... other modifications
+}, options?: TxOptions);
+```
+
+### fetchMarketConfigs
+
+```typescript
+const configs = await client.drift.fetchMarketConfigs();
+// Returns: { perpMarkets: PerpMarketConfig[], spotMarkets: SpotMarketConfig[] }
+```
+
+### fetchAndParseDriftUsers
+
+```typescript
+const users = await client.drift.fetchAndParseDriftUsers(vaultPda: PublicKey);
+// Returns: DriftUser[]
 ```
 
 ---
@@ -261,6 +331,21 @@ await client.fees.fulfill(vaultPda: PublicKey, shareClassIndex: number, options?
 
 ```typescript
 await client.fees.claimFees(vaultPda: PublicKey, options?: TxOptions);
+```
+
+### crystallizeFees
+
+```typescript
+await client.fees.crystallizeFees(vaultPda: PublicKey, options?: TxOptions);
+```
+
+### setProtocolFees
+
+```typescript
+await client.fees.setProtocolFees(vaultPda: PublicKey, {
+  baseFeeBps: number;
+  flowFeeBps: number;
+}, options?: TxOptions);
 ```
 
 ---
@@ -447,6 +532,43 @@ await client.mint.unpauseSubscription(options?: TxOptions);
 ```typescript
 await client.mint.pauseRedemption(options?: TxOptions);
 await client.mint.unpauseRedemption(options?: TxOptions);
+```
+
+### initializeWithStateParams
+
+```typescript
+const { mintPda, txId } = await client.mint.initializeWithStateParams(vaultPda: PublicKey, {
+  name: string;
+  symbol: string;
+  decimals: number;
+  // ... additional mint config
+}, options?: TxOptions);
+```
+
+### setTokenAccountsStates
+
+```typescript
+await client.mint.setTokenAccountsStates(vaultPda: PublicKey, {
+  accounts: PublicKey[];
+  frozen: boolean;
+}, options?: TxOptions);
+```
+
+### forceTransfer
+
+```typescript
+await client.mint.forceTransfer(vaultPda: PublicKey, {
+  source: PublicKey;
+  destination: PublicKey;
+  amount: BN;
+}, options?: TxOptions);
+```
+
+### fetchTokenHolders
+
+```typescript
+const holders = await client.mint.fetchTokenHolders(mintPda: PublicKey);
+// Returns: { owner: PublicKey, amount: BN }[]
 ```
 
 ---

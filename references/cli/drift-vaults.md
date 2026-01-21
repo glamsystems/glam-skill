@@ -2,13 +2,13 @@
 
 Deposit into Drift's managed vaults to earn yield from vault strategies.
 
-> **Note:** This is different from `glam drift` (direct Drift Protocol trading). Drift Vaults are managed strategies run by third-party vault managers.
+> **Note:** This is different from `glam drift-protocol` (direct Drift Protocol trading). Drift Vaults are managed strategies run by third-party vault managers.
 
 ## Prerequisites
 
 ```bash
 # Enable the integration first
-glam integrations enable <VAULT> DriftVaults
+glam integration enable <VAULT> DriftVaults
 ```
 
 ## Commands
@@ -98,7 +98,7 @@ glam drift-vaults withdraw <DRIFT_VAULT_ADDRESS>
 
 ```bash
 # 1. Enable integration
-glam integrations enable <VAULT> DriftVaults
+glam integration enable <VAULT> DriftVaults
 
 # 2. Allowlist the Drift vault you want to use
 glam drift-vaults allowlist-vault <DRIFT_VAULT_ADDRESS>

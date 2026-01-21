@@ -1,5 +1,13 @@
 # CLI: LST (Liquid Staking Tokens)
 
+> **⚠️ WARNING: Development Only**
+>
+> The `glam lst` commands are **unaudited** and require `NODE_ENV=development` flag to use. Do not use in production without thorough testing and security review.
+>
+> ```bash
+> NODE_ENV=development glam lst stake <STAKEPOOL> 100
+> ```
+
 Stake SOL into SPL stake pools to receive liquid staking tokens.
 
 > **Note:** This is for generic SPL stake pools. For Marinade-specific staking, see [staking.md](./staking.md).
@@ -8,7 +16,7 @@ Stake SOL into SPL stake pools to receive liquid staking tokens.
 
 ```bash
 # Enable the integration first
-glam integrations enable <VAULT> SplStakePool
+glam integration enable <VAULT> SplStakePool
 ```
 
 ## Commands
@@ -73,7 +81,7 @@ glam lst unstake LstMintAddress111... 5 --deactivate
 
 ```bash
 # 1. Enable integration
-glam integrations enable <VAULT> SplStakePool
+glam integration enable <VAULT> SplStakePool
 
 # 2. Stake SOL to receive LST
 glam lst stake <STAKEPOOL_ADDRESS> 100

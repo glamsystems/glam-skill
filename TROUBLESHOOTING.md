@@ -62,8 +62,9 @@ Error: Keypair file not found at /path/to/keypair.json
 
 **Solution:**
 ```bash
-# Set correct keypair path
-glam config set keypairPath ~/.config/solana/id.json
+# Set correct keypair path via environment
+export KEYPAIR_PATH=~/.config/solana/id.json
+# Or add to .env file: KEYPAIR_PATH=~/.config/solana/id.json
 
 # Verify keypair exists
 ls -la ~/.config/solana/id.json
@@ -94,13 +95,18 @@ Error: keypairPath is not configured
 ```
 
 **Solution:**
+Create a `.env` file in your project root:
 ```bash
-# View current config
-glam config view
+# .env file
+KEYPAIR_PATH=~/.config/solana/id.json
+RPC_URL=https://api.mainnet-beta.solana.com
 
-# Set all required values
-glam config set keypairPath ~/.config/solana/id.json
-glam config set rpcUrl https://api.mainnet-beta.solana.com
+# Or set environment variables directly:
+export KEYPAIR_PATH=~/.config/solana/id.json
+export RPC_URL=https://api.mainnet-beta.solana.com
+
+# Display current environment setup
+glam env
 ```
 
 ---
@@ -193,12 +199,12 @@ Error: Signer is not authorized to perform this action
 
 2. **Missing delegate permission** - Grant required permission
    ```bash
-   glam delegates grant <VAULT> <DELEGATE> --permissions Swap
+   glam delegate grant <VAULT> <DELEGATE> --permissions Swap
    ```
 
 3. **Integration not enabled** - Enable the required integration
    ```bash
-   glam integrations enable <VAULT> JupiterSwap
+   glam integration enable <VAULT> JupiterSwap
    ```
 
 ### Delegate permission denied
@@ -211,10 +217,10 @@ Error: Delegate does not have required permission
 **Solution:**
 ```bash
 # List delegate permissions
-glam delegates list <VAULT_ADDRESS>
+glam delegate list <VAULT_ADDRESS>
 
 # Grant missing permissions
-glam delegates grant <VAULT> <DELEGATE> --permissions Swap,KaminoDeposit
+glam delegate grant <VAULT> <DELEGATE> --permissions Swap,KaminoDeposit
 ```
 
 ### Asset not in allowlist
@@ -244,7 +250,8 @@ Error: 429 Too Many Requests
 **Solution:**
 ```bash
 # Use a paid RPC endpoint
-glam config set rpcUrl https://your-paid-rpc.com
+export RPC_URL=https://your-paid-rpc.com
+# Or add to .env file: RPC_URL=https://your-paid-rpc.com
 
 # Or add delay between commands
 ```
@@ -258,11 +265,11 @@ Error: Connection refused
 
 **Solution:**
 ```bash
-# Check RPC URL is correct
-glam config view
+# Check current RPC URL
+glam env
 
 # Try a different RPC
-glam config set rpcUrl https://api.mainnet-beta.solana.com
+export RPC_URL=https://api.mainnet-beta.solana.com
 ```
 
 ### Account not found
@@ -283,7 +290,7 @@ Error: Account does not exist
 glam vault view <VAULT_ADDRESS>
 
 # Check you're on the right cluster
-glam config view
+glam env
 ```
 
 ---
@@ -339,7 +346,7 @@ Error: Drift user account not found
 **Solution:**
 ```bash
 # Initialize Drift user first
-glam drift init-user <VAULT_ADDRESS>
+glam drift-protocol init-user <VAULT_ADDRESS>
 ```
 
 ### Drift: Insufficient collateral
@@ -352,7 +359,7 @@ Error: Insufficient collateral for position
 **Solution:**
 ```bash
 # Deposit more collateral
-glam drift deposit <VAULT> --market-index 0 --amount 1000
+glam drift-protocol deposit <VAULT> --market-index 0 --amount 1000
 
 # Or reduce position size
 ```
@@ -380,7 +387,7 @@ Error: Obligation account not found
 **Solution:**
 ```bash
 # Initialize Kamino first
-glam kamino init <VAULT_ADDRESS>
+glam kamino-lend init <VAULT_ADDRESS>
 ```
 
 ---

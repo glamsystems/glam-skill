@@ -1,5 +1,14 @@
 # CLI: Staking Commands
 
+> **⚠️ WARNING: Development Only**
+>
+> The `glam marinade`, `glam stake`, and `glam lst` commands are **unaudited** and require `NODE_ENV=development` flag to use. Do not use these in production without thorough testing and security review.
+>
+> ```bash
+> # Enable development mode to use these commands
+> NODE_ENV=development glam marinade stake <VAULT> --amount 100
+> ```
+
 SOL staking operations via multiple protocols.
 
 ## Available Staking Integrations
@@ -16,7 +25,7 @@ SOL staking operations via multiple protocols.
 **Prerequisite:** Enable `MarinadeStaking` integration.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> MarinadeStaking
+glam integration enable <VAULT_ADDRESS> MarinadeStaking
 ```
 
 ### Stake SOL to get mSOL
@@ -48,7 +57,7 @@ glam marinade claim <VAULT_ADDRESS> --ticket <TICKET_ADDRESS>
 **Prerequisite:** Enable `NativeStaking` integration.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> NativeStaking
+glam integration enable <VAULT_ADDRESS> NativeStaking
 ```
 
 ### Stake to validator
@@ -76,7 +85,7 @@ glam stake withdraw <VAULT_ADDRESS> --stake-account <STAKE_ACCOUNT>
 **Prerequisite:** Enable `SplStakePool` integration.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> SplStakePool
+glam integration enable <VAULT_ADDRESS> SplStakePool
 ```
 
 ### Deposit to stake pool
@@ -98,7 +107,7 @@ glam stake-pool withdraw <VAULT_ADDRESS> --pool <POOL_ADDRESS> --amount <TOKEN_A
 **Prerequisite:** Enable `SanctumStaking` integration.
 
 ```bash
-glam integrations enable <VAULT_ADDRESS> SanctumStaking
+glam integration enable <VAULT_ADDRESS> SanctumStaking
 ```
 
 ### Stake via Sanctum
@@ -130,7 +139,7 @@ glam sanctum unstake <VAULT_ADDRESS> --lst <LST_MINT> --amount <LST_AMOUNT>
 
 ```bash
 # 1. Enable integration
-glam integrations enable <VAULT> MarinadeStaking
+glam integration enable <VAULT> MarinadeStaking
 
 # 2. Stake SOL
 glam marinade stake <VAULT> --amount 100

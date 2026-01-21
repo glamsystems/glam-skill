@@ -27,7 +27,7 @@ glam vault allowlist-asset <VAULT_ADDRESS> EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZ
 glam vault allowlist-asset <VAULT_ADDRESS> Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
 
 # 4. Enable Jupiter for swaps
-glam integrations enable <VAULT_ADDRESS> JupiterSwap
+glam integration enable <VAULT_ADDRESS> JupiterSwap
 
 # 5. Check balances
 glam vault balances <VAULT_ADDRESS>
@@ -102,14 +102,14 @@ const txId = await client.jupiterSwap.swap(vaultPda, {
 
 ```bash
 # Grant trading permissions to a delegate
-glam delegates grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> \
+glam delegate grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> \
   --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftCancelOrders
 
 # Verify delegate was added
-glam delegates list <VAULT_ADDRESS>
+glam delegate list <VAULT_ADDRESS>
 
 # Grant Kamino permissions to another delegate
-glam delegates grant <VAULT_ADDRESS> <OTHER_DELEGATE> \
+glam delegate grant <VAULT_ADDRESS> <OTHER_DELEGATE> \
   --permissions KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
 ```
 
@@ -142,19 +142,19 @@ for (const delegate of delegates) {
 
 ```bash
 # 1. Enable Kamino integration
-glam integrations enable <VAULT_ADDRESS> KaminoLend
+glam integration enable <VAULT_ADDRESS> KaminoLend
 
 # 2. Initialize Kamino for vault
-glam kamino init <VAULT_ADDRESS>
+glam kamino-lend init <VAULT_ADDRESS>
 
 # 3. Deposit USDC to main market
-glam kamino deposit <VAULT_ADDRESS> \
+glam kamino-lend deposit <VAULT_ADDRESS> \
   --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
   --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
   --amount 1000
 
 # 4. View positions
-glam kamino list <VAULT_ADDRESS>
+glam kamino-lend list <VAULT_ADDRESS>
 ```
 
 ### Deposit to Kamino Lending (SDK)
@@ -183,19 +183,19 @@ console.log("Lending positions:", positions);
 
 ```bash
 # 1. Enable Drift integration
-glam integrations enable <VAULT_ADDRESS> DriftProtocol
+glam integration enable <VAULT_ADDRESS> DriftProtocol
 
 # 2. Initialize Drift user
-glam drift init-user <VAULT_ADDRESS>
+glam drift-protocol init-user <VAULT_ADDRESS>
 
 # 3. Deposit USDC as collateral
-glam drift deposit <VAULT_ADDRESS> --market-index 0 --amount 1000
+glam drift-protocol deposit <VAULT_ADDRESS> --market-index 0 --amount 1000
 
 # 4. Open 1 SOL-PERP long
-glam drift perp <VAULT_ADDRESS> --market-index 0 --amount 1 --direction long
+glam drift-protocol perp <VAULT_ADDRESS> --market-index 0 --amount 1 --direction long
 
 # 5. View positions
-glam drift list-positions <VAULT_ADDRESS>
+glam drift-protocol list-positions <VAULT_ADDRESS>
 ```
 
 ---
@@ -214,13 +214,13 @@ glam vault create \
   --assets So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
 # 2. Enable all required integrations
-glam integrations enable <VAULT_ADDRESS> JupiterSwap DriftProtocol KaminoLend
+glam integration enable <VAULT_ADDRESS> JupiterSwap DriftProtocol KaminoLend
 
 # 3. Set initial share price (1.0 USDC)
 glam manage price <VAULT_ADDRESS> --share-class 0 --price 1.0
 
 # 4. Set up a trading delegate
-glam delegates grant <VAULT_ADDRESS> <TRADER_PUBKEY> \
+glam delegate grant <VAULT_ADDRESS> <TRADER_PUBKEY> \
   --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftPerpMarket
 
 # 5. Configure swap policy
@@ -293,21 +293,21 @@ glam jupiter swap <VAULT> \
   --slippage 50
 
 # 2. Deposit remaining USDC to Kamino for yield
-glam kamino deposit <VAULT> \
+glam kamino-lend deposit <VAULT> \
   --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
   --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
   --amount 5000
 
 # 3. Deposit SOL as collateral on Drift
-glam drift deposit <VAULT> --market-index 1 --amount 50
+glam drift-protocol deposit <VAULT> --market-index 1 --amount 50
 
 # 4. Open delta-neutral position
-glam drift perp <VAULT> --market-index 0 --amount 25 --direction short
+glam drift-protocol perp <VAULT> --market-index 0 --amount 25 --direction short
 
 # 5. Check all positions
 glam vault holdings <VAULT>
-glam kamino list <VAULT>
-glam drift list-positions <VAULT>
+glam kamino-lend list <VAULT>
+glam drift-protocol list-positions <VAULT>
 ```
 
 ### Investor Subscription Flow (CLI)

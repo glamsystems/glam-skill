@@ -7,7 +7,7 @@
       "expectedBehaviors": [
         "Uses glam vault create command with --name flag",
         "Includes --assets flag with SOL and USDC mint addresses",
-        "Uses glam integrations enable command for JupiterSwap",
+        "Uses glam integration enable command for JupiterSwap",
         "Provides vault address after creation"
       ],
       "tags": ["basic", "vault", "cli"]
@@ -30,7 +30,7 @@
       "description": "Set up delegate permissions for trading",
       "prompt": "Configure my vault at address VAULT123 to allow wallet TRADER456 to perform swaps and Drift trading operations.",
       "expectedBehaviors": [
-        "Uses glam delegates grant command",
+        "Uses glam delegate grant command",
         "Includes Swap permission",
         "Includes Drift-related permissions (DriftDeposit, DriftWithdraw, DriftPlaceOrders, etc.)",
         "Uses --permissions flag with comma-separated values"
@@ -45,7 +45,7 @@
         "Uses glam vault create with --share-class-name and --share-class-symbol flags",
         "Enables JupiterSwap integration",
         "Enables KaminoLend integration",
-        "Uses glam delegates grant for setting up delegate",
+        "Uses glam delegate grant for setting up delegate",
         "Explains the subscription/redemption workflow"
       ],
       "tags": ["advanced", "tokenized", "workflow", "cli"]
@@ -56,8 +56,8 @@
       "prompt": "I want to deposit 1000 USDC from my vault at VAULT_ADDR to Kamino lending to earn yield.",
       "expectedBehaviors": [
         "Checks if KaminoLend integration is enabled",
-        "Uses glam kamino init if not already initialized",
-        "Uses glam kamino deposit with correct market address",
+        "Uses glam kamino-lend init if not already initialized",
+        "Uses glam kamino-lend deposit with correct market address",
         "Specifies --mint with USDC address",
         "Specifies --amount 1000"
       ],
@@ -82,9 +82,9 @@
       "prompt": "Initialize Drift for my vault VAULT123, deposit 2000 USDC as collateral, and open a 5 SOL long perpetual position.",
       "expectedBehaviors": [
         "Enables DriftProtocol integration if needed",
-        "Uses glam drift init-user command",
-        "Uses glam drift deposit with --market-index 0 --amount 2000",
-        "Uses glam drift perp with --market-index 0 --amount 5 --direction long"
+        "Uses glam drift-protocol init-user command",
+        "Uses glam drift-protocol deposit with --market-index 0 --amount 2000",
+        "Uses glam drift-protocol perp with --market-index 0 --amount 5 --direction long"
       ],
       "tags": ["advanced", "drift", "perpetuals", "cli"]
     },
@@ -121,7 +121,7 @@
         "Asks to verify the vault manager address using glam vault view",
         "Suggests checking if using correct keypair",
         "Suggests checking delegate permissions if operating as delegate",
-        "Provides glam delegates grant command if needed",
+        "Provides glam delegate grant command if needed",
         "Explains the difference between manager and delegate permissions"
       ],
       "tags": ["troubleshooting", "errors", "cli"]
@@ -146,9 +146,9 @@
       "prompt": "Set up a yield strategy: deposit USDC to Kamino lending, then use it as collateral to borrow SOL, and stake the borrowed SOL in Marinade.",
       "expectedBehaviors": [
         "Enables KaminoLend and MarinadeStaking integrations",
-        "Initializes Kamino with glam kamino init",
-        "Deposits USDC with glam kamino deposit",
-        "Borrows SOL with glam kamino borrow",
+        "Initializes Kamino with glam kamino-lend init",
+        "Deposits USDC with glam kamino-lend deposit",
+        "Borrows SOL with glam kamino-lend borrow",
         "Stakes SOL with marinade stake command",
         "Explains the leverage/risk involved in this strategy"
       ],

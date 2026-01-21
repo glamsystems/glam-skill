@@ -58,6 +58,34 @@ glam cctp list <VAULT_ADDRESS>
 
 ---
 
+## CCTP Policy Commands
+
+### `glam cctp view-policy`
+
+View CCTP policy settings for the vault.
+
+```bash
+glam cctp view-policy <VAULT_ADDRESS>
+```
+
+### `glam cctp allowlist-destination`
+
+Add a destination address/domain to the CCTP allowlist.
+
+```bash
+glam cctp allowlist-destination <VAULT_ADDRESS> --domain <DOMAIN_ID> --address <ADDRESS>
+```
+
+### `glam cctp remove-destination`
+
+Remove a destination from the CCTP allowlist.
+
+```bash
+glam cctp remove-destination <VAULT_ADDRESS> --domain <DOMAIN_ID> --address <ADDRESS>
+```
+
+---
+
 ## Timelock Commands
 
 Protect vault with timelocked configuration changes.
