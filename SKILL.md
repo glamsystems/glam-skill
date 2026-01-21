@@ -306,6 +306,6 @@ await client.jupiterSwap.swap(vaultPda, {
 ## Resources
 
 - GitHub: https://github.com/glamsystems
-- Documentation: https://glam.systems/docs
-- NPM CLI: https://www.npmjs.com/package/@glamsystems/glam-cli
-- NPM SDK: https://www.npmjs.com/package/@glamsystems/glam-sdk
+- Documentation: https://docs.glam.systems/
+- CLI: https://www.npmjs.com/package/@glamsystems/glam-cli
+- SDK: https://www.npmjs.com/package/@glamsystems/glam-sdk
