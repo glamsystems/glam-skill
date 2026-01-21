@@ -1,6 +1,6 @@
 ---
 name: glam
-description: Solana vault management via GLAM Protocol. Triggers: glam, glam-cli, glam-sdk, vault create/manage, tokenized vault, share class, DeFi vault, treasury, asset management, access control, delegate permissions, Jupiter swap, Drift perpetuals/spot/vaults, Kamino lending/borrow/vaults/farms, staking (Marinade/native/SPL/Sanctum/LST), Meteora DLMM, cross-chain USDC (CCTP), timelock, subscription/redemption, NAV pricing, token transfer. Supports CLI and TypeScript SDK.
+description: "Solana vault management via GLAM Protocol. Triggers: glam, glam-cli, glam-sdk, vault create/manage, tokenized vault, share class, DeFi vault, treasury, asset management, access control, delegate permissions, Jupiter swap, Drift perpetuals/spot/vaults, Kamino lending/borrow/vaults/farms, staking (Marinade/native/SPL/Sanctum/LST), Meteora DLMM, cross-chain USDC (CCTP), timelock, subscription/redemption, NAV pricing, token transfer. Supports CLI and TypeScript SDK."
 ---
 
 # GLAM Protocol Skill
