@@ -1,0 +1,109 @@
+# CLI: Delegate Commands
+
+Manage access control and delegate permissions for vaults.
+
+## Commands
+
+### `glam delegates grant`
+
+Grant delegate permissions.
+
+```bash
+glam delegates grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> --permissions <PERMS>
+```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--permissions <PERMS>` | Comma-separated permissions |
+
+**Available permissions:**
+
+| Permission | Description |
+|------------|-------------|
+| `Swap` | Token swaps |
+| `Stake` | Staking operations |
+| `Unstake` | Unstaking operations |
+| `LiquidUnstake` | Liquid unstaking |
+| `DriftInit` | Initialize Drift account |
+| `DriftDeposit` | Deposit to Drift |
+| `DriftWithdraw` | Withdraw from Drift |
+| `DriftUpdateUser` | Update Drift user |
+| `DriftDeleteUser` | Delete Drift user |
+| `DriftPlaceOrders` | Place Drift orders |
+| `DriftCancelOrders` | Cancel Drift orders |
+| `DriftPerpMarket` | Drift perp trading |
+| `DriftSpotMarket` | Drift spot trading |
+| `KaminoInit` | Initialize Kamino |
+| `KaminoDeposit` | Deposit to Kamino |
+| `KaminoWithdraw` | Withdraw from Kamino |
+| `KaminoBorrow` | Borrow from Kamino |
+| `KaminoRepay` | Repay Kamino loans |
+| `MeteoraInit` | Initialize Meteora |
+| `MeteoraDeposit` | Deposit to Meteora |
+| `MeteoraWithdraw` | Withdraw from Meteora |
+
+**Examples:**
+
+```bash
+# Grant swap and staking permissions
+glam delegates grant <VAULT> <DELEGATE> --permissions Swap,Stake,Unstake
+
+# Grant Drift trading permissions
+glam delegates grant <VAULT> <DELEGATE> --permissions DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftPerpMarket
+
+# Grant Kamino lending permissions
+glam delegates grant <VAULT> <DELEGATE> --permissions KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
+```
+
+### `glam delegates list`
+
+List vault delegates and their permissions.
+
+```bash
+glam delegates list <VAULT_ADDRESS>
+```
+
+### `glam delegates revoke`
+
+Revoke a specific delegate's permissions.
+
+```bash
+glam delegates revoke <VAULT_ADDRESS> <DELEGATE_PUBKEY>
+```
+
+### `glam delegates revoke-all`
+
+Revoke all delegates.
+
+```bash
+glam delegates revoke-all <VAULT_ADDRESS>
+```
+
+---
+
+## Common Patterns
+
+### Trading Delegate Setup
+
+```bash
+# Full Drift trading permissions
+glam delegates grant <VAULT> <TRADER> \
+  --permissions Swap,DriftInit,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftCancelOrders,DriftPerpMarket,DriftSpotMarket
+```
+
+### Yield Manager Setup
+
+```bash
+# Kamino lending permissions
+glam delegates grant <VAULT> <MANAGER> \
+  --permissions KaminoInit,KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
+```
+
+### Staking Delegate Setup
+
+```bash
+# Staking permissions
+glam delegates grant <VAULT> <STAKER> \
+  --permissions Stake,Unstake,LiquidUnstake
+```

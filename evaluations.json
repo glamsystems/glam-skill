@@ -87,6 +87,72 @@
         "Uses glam drift perp with --market-index 0 --amount 5 --direction long"
       ],
       "tags": ["advanced", "drift", "perpetuals", "cli"]
+    },
+    {
+      "name": "staking-marinade",
+      "description": "Stake SOL via Marinade liquid staking",
+      "prompt": "Stake 10 SOL from my vault VAULT123 using Marinade to get mSOL.",
+      "expectedBehaviors": [
+        "Enables MarinadeStaking integration if not already enabled",
+        "Uses appropriate marinade stake command",
+        "Specifies amount of 10 SOL",
+        "Explains that mSOL liquid staking token will be received"
+      ],
+      "tags": ["intermediate", "staking", "marinade", "cli"]
+    },
+    {
+      "name": "cctp-bridge",
+      "description": "Bridge USDC cross-chain via CCTP",
+      "prompt": "Bridge 1000 USDC from my Solana vault VAULT123 to my Ethereum address 0x742d35Cc6634C0532925a3b844Bc9e7595f00000.",
+      "expectedBehaviors": [
+        "Uses glam cctp bridge-usdc command",
+        "Specifies --destination with the Ethereum address",
+        "Specifies --amount 1000",
+        "Specifies --destination-domain 0 for Ethereum",
+        "Explains the bridging process and timeline"
+      ],
+      "tags": ["advanced", "cctp", "cross-chain", "cli"]
+    },
+    {
+      "name": "error-recovery-unauthorized",
+      "description": "Diagnose and fix authorization error",
+      "prompt": "I'm getting 'Signer is not authorized' when trying to swap on my vault VAULT123. How do I fix this?",
+      "expectedBehaviors": [
+        "Asks to verify the vault manager address using glam vault view",
+        "Suggests checking if using correct keypair",
+        "Suggests checking delegate permissions if operating as delegate",
+        "Provides glam delegates grant command if needed",
+        "Explains the difference between manager and delegate permissions"
+      ],
+      "tags": ["troubleshooting", "errors", "cli"]
+    },
+    {
+      "name": "sdk-full-workflow",
+      "description": "Complete SDK workflow with multiple operations",
+      "prompt": "Write a TypeScript script that creates a vault, enables Jupiter, deposits some SOL, and performs a swap from SOL to USDC.",
+      "expectedBehaviors": [
+        "Imports GlamClient and related types from @glamsystems/glam-sdk",
+        "Creates GlamClient with proper configuration",
+        "Chains vault creation with enableIntegration",
+        "Calls jupiterSwap.swap with correct parameters",
+        "Handles async/await properly",
+        "Includes BN for amounts"
+      ],
+      "tags": ["advanced", "sdk", "typescript", "workflow"]
+    },
+    {
+      "name": "multi-protocol-strategy",
+      "description": "Complex multi-protocol DeFi strategy",
+      "prompt": "Set up a yield strategy: deposit USDC to Kamino lending, then use it as collateral to borrow SOL, and stake the borrowed SOL in Marinade.",
+      "expectedBehaviors": [
+        "Enables KaminoLend and MarinadeStaking integrations",
+        "Initializes Kamino with glam kamino init",
+        "Deposits USDC with glam kamino deposit",
+        "Borrows SOL with glam kamino borrow",
+        "Stakes SOL with marinade stake command",
+        "Explains the leverage/risk involved in this strategy"
+      ],
+      "tags": ["advanced", "multi-protocol", "strategy", "cli"]
     }
   ]
 }

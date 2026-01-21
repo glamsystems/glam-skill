@@ -1,288 +1,230 @@
 ---
 name: glam
-description: Manages GLAM Protocol vaults and DeFi operations on Solana. Use when the user mentions glam, glam-cli, glam-sdk, vault management, tokenized vaults, Solana DeFi integrations (Drift, Kamino, Jupiter), delegate permissions, treasury management, or asset management with access control. Supports CLI commands and TypeScript SDK operations.
+description: Solana vault management via GLAM Protocol. Triggers: glam, glam-cli, glam-sdk, vault create/manage, tokenized vault, share class, DeFi vault, treasury, asset management, access control, delegate permissions, Jupiter swap, Drift perpetuals/spot/vaults, Kamino lending/borrow/vaults/farms, staking (Marinade/native/SPL/Sanctum/LST), Meteora DLMM, cross-chain USDC (CCTP), timelock, subscription/redemption, NAV pricing, token transfer. Supports CLI and TypeScript SDK.
 ---
 
-# GLAM Protocol - Solana Asset Management
+# GLAM Protocol Skill
 
-GLAM provides programmable investment infrastructure on Solana through vaults with built-in access control, DeFi integrations, and tokenization capabilities.
+GLAM provides programmable investment infrastructure on Solana: vaults with access control, DeFi integrations, and tokenization.
 
 ## Quick Start
 
-### Install CLI
-
 ```bash
+# Install CLI
 npm install -g @glamsystems/glam-cli
-```
 
-### Configure
+# Configure
+glam config set keypairPath ~/.config/solana/id.json
 
-```bash
-# Set keypair path (required)
-glam config set keypairPath /path/to/keypair.json
-
-# Set RPC URL (optional, defaults to mainnet)
-glam config set rpcUrl https://api.mainnet-beta.solana.com
-
-# Verify configuration
-glam config view
-```
-
-### Create First Vault
-
-```bash
-# Create a basic vault
+# Create vault
 glam vault create --name "My Vault"
-
-# View vault details
-glam vault view <VAULT_ADDRESS>
-
-# List your vaults
-glam vault list
 ```
 
-## Core Operations
+## Critical: Integration Enablement
 
-### Vault Management
+**You MUST enable integrations BEFORE using them.** This is the most common error.
 
 ```bash
-# Create vault with custom settings
-glam vault create --name "Treasury" --assets SOL,USDC
-
-# Check balances
-glam vault balances <VAULT_ADDRESS>
-
-# View holdings with prices
-glam vault holdings <VAULT_ADDRESS>
-
-# Add asset to allowlist
-glam vault allowlist-asset <VAULT_ADDRESS> <MINT_ADDRESS>
-
-# Wrap/unwrap SOL
-glam vault wrap <VAULT_ADDRESS> --amount 1.0
-glam vault unwrap <VAULT_ADDRESS> --amount 1.0
+# Enable before using
+glam integrations enable <VAULT> JupiterSwap    # Before any swap
+glam integrations enable <VAULT> DriftProtocol  # Before any Drift operation
+glam integrations enable <VAULT> KaminoLend     # Before any Kamino operation
+glam integrations enable <VAULT> MarinadeStaking # Before staking
 ```
 
-### Enable Integrations
+Available: `JupiterSwap`, `DriftProtocol`, `KaminoLend`, `KaminoVault`, `KaminoFarm`, `MarinadeStaking`, `NativeStaking`, `SplStakePool`, `SanctumStaking`, `MeteoraDlmm`, `Invariant`, `Orca`.
 
-```bash
-# List available integrations
-glam integrations list
-
-# Enable Jupiter swap
-glam integrations enable <VAULT_ADDRESS> JupiterSwap
-
-# Enable multiple integrations
-glam integrations enable <VAULT_ADDRESS> DriftProtocol KaminoLend
-
-# Disable integration
-glam integrations disable <VAULT_ADDRESS> JupiterSwap
-```
-
-Available integrations: `JupiterSwap`, `DriftProtocol`, `KaminoLend`, `KaminoVault`, `KaminoFarm`, `MarinadeStaking`, `NativeStaking`, `SplStakePool`, `SanctumStaking`, `MeteoraDlmm`, `Invariant`, `Orca`.
-
-### Token Swaps (Jupiter)
-
-```bash
-# Swap tokens
-glam jupiter swap <VAULT_ADDRESS> --input-mint <INPUT_MINT> --output-mint <OUTPUT_MINT> --amount 100 --slippage 50
-
-# View swap policy
-glam jupiter view-policy <VAULT_ADDRESS>
-
-# Set max slippage (basis points)
-glam jupiter set-max-slippage <VAULT_ADDRESS> --max-slippage 100
-
-# Allowlist token for swaps
-glam jupiter allowlist-token <VAULT_ADDRESS> <MINT_ADDRESS>
-```
-
-### Lending (Kamino)
-
-```bash
-# Initialize Kamino lending
-glam kamino init <VAULT_ADDRESS>
-
-# Deposit to lending market
-glam kamino deposit <VAULT_ADDRESS> --market <MARKET_ADDRESS> --mint <MINT_ADDRESS> --amount 1000
-
-# Withdraw from lending
-glam kamino withdraw <VAULT_ADDRESS> --market <MARKET_ADDRESS> --mint <MINT_ADDRESS> --amount 500
-
-# Borrow assets
-glam kamino borrow <VAULT_ADDRESS> --market <MARKET_ADDRESS> --mint <MINT_ADDRESS> --amount 100
-
-# Repay borrowed assets
-glam kamino repay <VAULT_ADDRESS> --market <MARKET_ADDRESS> --mint <MINT_ADDRESS> --amount 100
-
-# List lending positions
-glam kamino list <VAULT_ADDRESS>
-```
-
-### Perpetuals (Drift)
-
-```bash
-# Initialize Drift user
-glam drift init-user <VAULT_ADDRESS>
-
-# Deposit collateral
-glam drift deposit <VAULT_ADDRESS> --market-index 0 --amount 1000
-
-# Open spot position
-glam drift spot <VAULT_ADDRESS> --market-index 1 --amount 100 --direction long
-
-# Open perp position
-glam drift perp <VAULT_ADDRESS> --market-index 0 --amount 1 --direction long
-
-# List positions
-glam drift list-positions <VAULT_ADDRESS>
-
-# Cancel orders
-glam drift cancel <VAULT_ADDRESS> --order-id 123
-```
-
-### Delegate Management
-
-```bash
-# Grant delegate permissions
-glam delegates grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> --permissions Swap,Stake
-
-# List delegates
-glam delegates list <VAULT_ADDRESS>
-
-# Revoke delegate
-glam delegates revoke <VAULT_ADDRESS> <DELEGATE_PUBKEY>
-
-# Revoke all delegates
-glam delegates revoke-all <VAULT_ADDRESS>
-```
-
-Available permissions: `Swap`, `Stake`, `Unstake`, `LiquidUnstake`, `DriftInit`, `DriftDeposit`, `DriftWithdraw`, `DriftUpdateUser`, `DriftDeleteUser`, `DriftPlaceOrders`, `DriftCancelOrders`, `DriftPerpMarket`, `DriftSpotMarket`, `KaminoInit`, `KaminoDeposit`, `KaminoWithdraw`, `KaminoBorrow`, `KaminoRepay`, `MeteoraInit`, `MeteoraDeposit`, `MeteoraWithdraw`.
-
-### Transfers
-
-```bash
-# Transfer assets from vault
-glam transfer transfer <VAULT_ADDRESS> --destination <DEST_ADDRESS> --mint <MINT_ADDRESS> --amount 100
-
-# View transfer policy
-glam transfer view-policy <VAULT_ADDRESS>
-
-# Allowlist destination
-glam transfer allowlist-destination <VAULT_ADDRESS> <DEST_ADDRESS>
-```
-
-### Cross-Chain (CCTP)
-
-```bash
-# Bridge USDC to another chain
-glam cctp bridge-usdc <VAULT_ADDRESS> --destination <DEST_ADDRESS> --amount 1000 --destination-domain 0
-
-# Receive bridged USDC
-glam cctp receive <VAULT_ADDRESS> --message <MESSAGE_HEX>
-
-# List CCTP transactions
-glam cctp list <VAULT_ADDRESS>
-```
+---
 
 ## Workflows
 
-### Create Tokenized Vault
+### Basic Vault Setup
 
-A tokenized vault allows investors to subscribe and receive share tokens.
+```
+Checklist:
+- [ ] Create vault
+- [ ] Enable integrations
+- [ ] Add assets to allowlist (if needed)
+- [ ] Verify configuration
+```
 
 ```bash
-# 1. Create vault with share class
-glam vault create --name "Token Fund" --share-class-name "FUND" --share-class-symbol "FUND"
+# 1. Create vault
+glam vault create --name "Treasury" --assets SOL,USDC
+# Save the vault address from output!
 
-# 2. Enable required integrations
-glam integrations enable <VAULT_ADDRESS> JupiterSwap KaminoLend
+# 2. Enable integrations
+glam integrations enable <VAULT> JupiterSwap KaminoLend
 
-# 3. Set subscription/redemption policies
-glam manage price <VAULT_ADDRESS> --share-class 0 --price 1.0
-
-# 4. Grant delegate permissions (optional)
-glam delegates grant <VAULT_ADDRESS> <MANAGER_PUBKEY> --permissions Swap,KaminoDeposit,KaminoWithdraw
+# 3. Verify
+glam vault view <VAULT>
 ```
 
-### Investor Operations
+### Tokenized Vault Setup
+
+```
+Checklist:
+- [ ] Create vault with share class
+- [ ] Enable integrations
+- [ ] Set initial NAV price
+- [ ] Configure swap policy
+- [ ] Set up delegates (optional)
+- [ ] Configure timelock (optional)
+```
 
 ```bash
-# Subscribe to vault (as investor)
-glam invest subscribe <VAULT_ADDRESS> --share-class 0 --amount 1000
+# 1. Create with share class
+glam vault create --name "Alpha Fund" \
+  --share-class-name "Alpha Shares" \
+  --share-class-symbol "ALPHA" \
+  --assets So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
 
-# Claim subscription after processing
-glam invest claim-subscription <VAULT_ADDRESS> --share-class 0
+# 2. Enable integrations
+glam integrations enable <VAULT> JupiterSwap DriftProtocol KaminoLend
 
-# Redeem shares
-glam invest redeem <VAULT_ADDRESS> --share-class 0 --shares 100
+# 3. Set initial price (1.0 USDC per share)
+glam manage price <VAULT> --share-class 0 --price 1.0
 
-# Claim redemption after processing
-glam invest claim-redemption <VAULT_ADDRESS> --share-class 0
+# 4. Configure swap policy
+glam jupiter set-max-slippage <VAULT> --max-slippage 100
+
+# 5. Set up trading delegate
+glam delegates grant <VAULT> <TRADER_PUBKEY> --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders
+
+# 6. Set timelock (24 hours)
+glam timelock set <VAULT> --delay 86400
 ```
 
-### DeFi Strategy Example
+### Drift Trading Setup
 
-Execute a yield strategy using multiple integrations:
+```
+Checklist:
+- [ ] Enable DriftProtocol integration
+- [ ] Initialize Drift user (required once)
+- [ ] Deposit collateral
+- [ ] Place trades
+```
 
 ```bash
-# 1. Swap USDC to SOL
-glam jupiter swap <VAULT_ADDRESS> --input-mint USDC_MINT --output-mint SOL_MINT --amount 5000 --slippage 50
+# 1. Enable
+glam integrations enable <VAULT> DriftProtocol
 
-# 2. Deposit SOL to Kamino lending
-glam kamino deposit <VAULT_ADDRESS> --market <MARKET> --mint SOL_MINT --amount 10
+# 2. Initialize user (REQUIRED)
+glam drift init-user <VAULT>
 
-# 3. Borrow USDC against SOL collateral
-glam kamino borrow <VAULT_ADDRESS> --market <MARKET> --mint USDC_MINT --amount 2000
+# 3. Deposit USDC as collateral
+glam drift deposit <VAULT> --market-index 0 --amount 1000
+
+# 4. Open position
+glam drift perp <VAULT> --market-index 0 --amount 1 --direction long
 ```
 
-### Timelock Operations
+### Kamino Lending Setup
 
-Protect vault with timelocked operations:
+```
+Checklist:
+- [ ] Enable KaminoLend integration
+- [ ] Initialize Kamino (required once)
+- [ ] Deposit to earn yield
+```
 
 ```bash
-# View timelock status
-glam timelock view <VAULT_ADDRESS>
+# 1. Enable
+glam integrations enable <VAULT> KaminoLend
 
-# Set timelock delay (seconds)
-glam timelock set <VAULT_ADDRESS> --delay 86400
+# 2. Initialize (REQUIRED)
+glam kamino init <VAULT>
 
-# Apply pending timelock
-glam timelock apply <VAULT_ADDRESS>
-
-# Cancel pending timelock
-glam timelock cancel <VAULT_ADDRESS>
+# 3. Deposit
+glam kamino deposit <VAULT> \
+  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  --amount 1000
 ```
 
-## SDK Usage
+---
 
-For programmatic access, use the TypeScript SDK:
+## Decision Tree
 
-```typescript
-import { GlamClient } from "@glamsystems/glam-sdk";
+**What do you want to do?**
 
-const client = new GlamClient({
-  cluster: "mainnet-beta",
-  // Optional: provide keypair for signing
-});
+**Swap tokens?**
+→ Enable `JupiterSwap` → `glam jupiter swap`
 
-// Create vault
-const { vaultPda, txId } = await client.vault.create({
-  name: "My Vault",
-  assets: [SOL_MINT, USDC_MINT],
-});
+**Earn yield on idle assets?**
+→ Lending: Enable `KaminoLend` → `glam kamino deposit`
+→ Staking: Enable `MarinadeStaking` → `glam marinade stake`
+→ Kamino Vaults: Enable `KaminoVault` → `glam kvaults deposit`
+→ Drift Vaults: Enable `DriftVaults` → `glam drift-vaults deposit`
 
-// Fetch vault state
-const state = await client.vault.fetch(vaultPda);
+**Trade perpetuals?**
+→ Enable `DriftProtocol` → `glam drift init-user` → `glam drift deposit` → `glam drift perp`
 
-// Swap via Jupiter
-await client.jupiterSwap.swap(vaultPda, {
-  inputMint: USDC_MINT,
-  outputMint: SOL_MINT,
-  amount: 1000_000_000,
-  slippageBps: 50,
-});
+**Trade spot on Drift?**
+→ Enable `DriftProtocol` → `glam drift init-user` → `glam drift deposit` → `glam drift spot`
+
+**Create tokenized vault with investors?**
+→ `vault create --share-class-*` → `manage price` → investors use `invest subscribe`
+
+**Bridge USDC cross-chain?**
+→ `glam cctp bridge-usdc --destination-domain <CHAIN_ID>`
+
+**Protect vault with timelock?**
+→ `glam timelock set --delay <SECONDS>`
+
+---
+
+## Validation Patterns
+
+Always verify operations succeeded:
+
+### After Creating Vault
+```bash
+glam vault view <VAULT>
+# Check: name, manager, integrations list
 ```
+
+### After Enabling Integration
+```bash
+glam vault view <VAULT>
+# Check: integration appears in list
+```
+
+### After Swap
+```bash
+glam vault balances <VAULT>
+# Check: balances changed as expected
+```
+
+### After Drift Trade
+```bash
+glam drift list-positions <VAULT>
+# Check: position appears
+```
+
+### After Kamino Deposit
+```bash
+glam kamino list <VAULT>
+# Check: position appears
+```
+
+---
+
+## Common Errors Quick Reference
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| "Signer is not authorized" | Wrong keypair or missing delegate permission | Check `vault view` for manager; grant delegate if needed |
+| "Integration not enabled" | Forgot to enable | `glam integrations enable <VAULT> <INTEGRATION>` |
+| "Asset not in allowlist" | Token not in vault allowlist | `glam vault allowlist-asset <VAULT> <MINT>` |
+| "User not initialized" | Drift/Kamino not initialized | Run `glam drift init-user` or `glam kamino init` |
+| "No route found" | Jupiter can't find swap path | Try smaller amount; check token liquidity |
+| "Slippage exceeded" | Price moved too much | Increase `--slippage` or reduce amount |
+| "Insufficient collateral" | Not enough collateral for position | Deposit more via `drift deposit` |
+
+→ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed solutions.
+
+---
 
 ## Common Mints
 
@@ -291,17 +233,66 @@ await client.jupiterSwap.swap(vaultPda, {
 | SOL | `So11111111111111111111111111111111111111112` |
 | USDC | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
 | USDT | `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` |
-| wSOL | `So11111111111111111111111111111111111111112` |
 | mSOL | `mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So` |
 | jitoSOL | `J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn` |
 | bSOL | `bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1` |
 
+---
+
+## SDK Quick Start
+
+```typescript
+import { GlamClient, COMMON_MINTS } from "@glamsystems/glam-sdk";
+import { BN } from "@coral-xyz/anchor";
+
+const client = new GlamClient({ keypair });
+
+// Create vault
+const { vaultPda } = await client.vault.create({
+  name: "My Vault",
+  assets: [COMMON_MINTS.SOL, COMMON_MINTS.USDC],
+});
+
+// Enable integration
+await client.vault.enableIntegration(vaultPda, "JupiterSwap");
+
+// Swap
+await client.jupiterSwap.swap(vaultPda, {
+  inputMint: COMMON_MINTS.USDC,
+  outputMint: COMMON_MINTS.SOL,
+  amount: new BN(100_000_000), // 100 USDC
+  slippageBps: 50,
+});
+```
+
+---
+
 ## Reference Documentation
 
-- [CLI Reference](./CLI_REFERENCE.md) - Complete CLI command documentation
-- [SDK Reference](./SDK_REFERENCE.md) - TypeScript SDK API reference
-- [Examples](./EXAMPLES.md) - Practical usage patterns and workflows
-- [Troubleshooting](./TROUBLESHOOTING.md) - Common errors and solutions
+### CLI Commands (by domain)
+- [Vault & Config](./references/cli/vault.md) - Vault creation, configuration, integrations
+- [Delegates](./references/cli/delegates.md) - Access control and permissions
+- [Jupiter](./references/cli/jupiter.md) - Token swaps
+- [Drift](./references/cli/drift.md) - Perpetuals and spot trading
+- [Kamino](./references/cli/kamino.md) - Lending and borrowing
+- [Kamino Vaults](./references/cli/kamino-vaults.md) - Automated yield vaults
+- [Kamino Farms](./references/cli/kamino-farms.md) - Liquidity mining rewards
+- [Drift Vaults](./references/cli/drift-vaults.md) - Managed Drift vaults
+- [Staking](./references/cli/staking.md) - Marinade, native, SPL, Sanctum staking
+- [LST](./references/cli/lst.md) - Liquid staking token operations
+- [Invest](./references/cli/invest.md) - Investor subscription/redemption
+- [Manage](./references/cli/manage.md) - Vault manager operations (price, fulfill, fees)
+- [Transfer](./references/cli/transfer.md) - Token transfers with allowlist
+- [Advanced](./references/cli/advanced.md) - CCTP bridging, timelock
+- [ALT](./references/cli/alt.md) - Address lookup table management
+
+### SDK Reference
+- [GlamClient](./references/sdk/client.md) - Client setup, vault operations
+- [Integrations](./references/sdk/integrations.md) - All integration clients
+
+### Other
+- [Examples](./EXAMPLES.md) - Practical usage patterns
+- [Troubleshooting](./TROUBLESHOOTING.md) - Error solutions
 
 ## Resources
 
