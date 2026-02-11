@@ -164,16 +164,7 @@ await client.jupiterSwap.swap(vaultPda, {
 
 ## Reference
 
-**Important**: Always prefer local reference files below. Only fall back to remote resources if the issue cannot be resolved locally.
-
-Detailed references in [./references/](./references/):
-
 - **CLI**: [vault](./references/cli/vault.md), [delegate](./references/cli/delegate.md), [jupiter](./references/cli/jupiter.md), [drift-protocol](./references/cli/drift-protocol.md), [kamino-lend](./references/cli/kamino-lend.md), [kamino-vaults](./references/cli/kamino-vaults.md), [kamino-farms](./references/cli/kamino-farms.md), [drift-vaults](./references/cli/drift-vaults.md), [staking](./references/cli/staking.md), [lst](./references/cli/lst.md), [invest](./references/cli/invest.md), [manage](./references/cli/manage.md), [transfer](./references/cli/transfer.md), [advanced](./references/cli/advanced.md), [alt](./references/cli/alt.md)
 - **SDK**: [client](./references/sdk/client.md), [integrations](./references/sdk/integrations.md), [mint](./references/sdk/mint.md), [multisig](./references/sdk/multisig.md)
 - **Other**: [concepts](./references/concepts.md), [examples](./EXAMPLES.md), [troubleshooting](./TROUBLESHOOTING.md)
-
-## Resources
-
-- Docs: https://docs.glam.systems/
-- CLI: [npm](https://www.npmjs.com/package/@glamsystems/glam-cli) | [GitHub](https://github.com/glamsystems/glam-cli) | [Docs](https://docs.glam.systems/v1/cli)
-- SDK: [npm](https://www.npmjs.com/package/@glamsystems/glam-sdk) | [GitHub](https://github.com/glamsystems/glam-sdk-ts) | [Docs](https://docs.glam.systems/v1/sdk)
+- **Docs**: https://docs.glam.systems/

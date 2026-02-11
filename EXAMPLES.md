@@ -2,14 +2,6 @@
 
 Practical usage patterns for CLI and SDK operations.
 
-## Table of Contents
-
-- [Basic Examples](#basic-examples)
-- [Intermediate Examples](#intermediate-examples)
-- [Advanced Examples](#advanced-examples)
-
----
-
 ## Basic Examples
 
 ### Create and Configure a Vault (CLI)
