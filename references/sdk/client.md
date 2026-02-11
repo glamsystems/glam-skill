@@ -12,11 +12,6 @@ yarn add @glamsystems/glam-sdk
 pnpm add @glamsystems/glam-sdk
 ```
 
-**Peer dependencies:**
-```bash
-npm install @solana/web3.js @coral-xyz/anchor
-```
-
 ## Constructor
 
 ```typescript
@@ -35,13 +30,13 @@ const client = new GlamClient({
 
 **Options:**
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `cluster` | string | Cluster to connect to (default: "mainnet-beta") |
-| `wallet` | Wallet | Wallet adapter for signing |
-| `provider` | AnchorProvider | Custom Anchor provider |
-| `statePda` | PublicKey | Default vault state PDA |
-| `jupiterApiKey` | string | Jupiter API key |
+| Option          | Type           | Description                                     |
+| --------------- | -------------- | ----------------------------------------------- |
+| `cluster`       | string         | Cluster to connect to (default: "mainnet-beta") |
+| `wallet`        | Wallet         | Wallet adapter for signing                      |
+| `provider`      | AnchorProvider | Custom Anchor provider                          |
+| `statePda`      | PublicKey      | Default vault state PDA                         |
+| `jupiterApiKey` | string         | Jupiter API key                                 |
 
 ## Custom Wallet Patterns
 
@@ -52,8 +47,12 @@ import { Wallet } from "@coral-xyz/anchor";
 
 class ReadOnlyWallet implements Wallet {
   constructor(public publicKey: PublicKey) {}
-  async signTransaction() { throw new Error("Read-only"); }
-  async signAllTransactions() { throw new Error("Read-only"); }
+  async signTransaction() {
+    throw new Error("Read-only");
+  }
+  async signAllTransactions() {
+    throw new Error("Read-only");
+  }
 }
 
 const client = new GlamClient({
@@ -83,7 +82,9 @@ import { AnchorProvider } from "@coral-xyz/anchor";
 import { Connection } from "@solana/web3.js";
 
 const connection = new Connection("https://api.mainnet-beta.solana.com");
-const provider = new AnchorProvider(connection, wallet, { commitment: "confirmed" });
+const provider = new AnchorProvider(connection, wallet, {
+  commitment: "confirmed",
+});
 
 const client = new GlamClient({ provider });
 ```
@@ -92,29 +93,29 @@ const client = new GlamClient({ provider });
 
 ```typescript
 // Sub-clients (lazy-loaded)
-client.vault          // Vault operations
-client.state          // Vault state account management
-client.access         // Delegate/permission management
-client.jupiterSwap    // Jupiter swap operations
-client.drift          // Drift protocol operations
-client.driftVaults    // Drift managed vault operations
-client.kaminoLending  // Kamino lending operations
-client.kaminoVaults   // Kamino automated vault operations
-client.kaminoFarm     // Kamino farm/staking operations
-client.marinade       // Marinade staking operations
-client.stakePool      // SPL stake pool operations
-client.stake          // Native staking operations
-client.invest         // Subscription/redemption
-client.fees           // Fee management
-client.price          // NAV pricing operations
-client.mint           // Share class mint operations
-client.timelock       // Timelock operations
-client.cctp           // Cross-chain USDC bridging
+client.vault; // Vault operations
+client.state; // Vault state account management
+client.access; // Delegate/permission management
+client.jupiterSwap; // Jupiter swap operations
+client.drift; // Drift protocol operations
+client.driftVaults; // Drift managed vault operations
+client.kaminoLending; // Kamino lending operations
+client.kaminoVaults; // Kamino automated vault operations
+client.kaminoFarm; // Kamino farm/staking operations
+client.marinade; // Marinade staking operations
+client.stakePool; // SPL stake pool operations
+client.stake; // Native staking operations
+client.invest; // Subscription/redemption
+client.fees; // Fee management
+client.price; // NAV pricing operations
+client.mint; // Share class mint operations
+client.timelock; // Timelock operations
+client.cctp; // Cross-chain USDC bridging
 
 // Core properties
-client.program        // Anchor program instance
-client.provider       // Anchor provider
-client.connection     // Solana connection
+client.program; // Anchor program instance
+client.provider; // Anchor provider
+client.connection; // Solana connection
 ```
 
 ---
@@ -292,12 +293,15 @@ interface TxOptions {
 **Example:**
 
 ```typescript
-await client.vault.create({
-  name: "My Vault"
-}, {
-  computeUnitLimit: 400_000,
-  simulate: true
-});
+await client.vault.create(
+  {
+    name: "My Vault",
+  },
+  {
+    computeUnitLimit: 400_000,
+    simulate: true,
+  },
+);
 ```
 
 ---
@@ -308,8 +312,18 @@ SDK sub-clients expose a `txBuilder` property for building instructions without 
 
 ```typescript
 // Get instructions for multisig or custom transaction building
-const ix = await client.access.txBuilder.enableDisableProtocolsIx(program, bitflag, enable, signer);
-const ix2 = await client.access.txBuilder.grantDelegatePermissionsIx(delegate, permissions, protocol, signer);
+const ix = await client.access.txBuilder.enableDisableProtocolsIx(
+  program,
+  bitflag,
+  enable,
+  signer,
+);
+const ix2 = await client.access.txBuilder.grantDelegatePermissionsIx(
+  delegate,
+  permissions,
+  protocol,
+  signer,
+);
 
 // Use with Squads multisig or custom transaction builders
 ```
@@ -335,7 +349,7 @@ enum StateAccountType {
 interface StateModel {
   pubkey: PublicKey;
   accountType: StateAccountType;
-  name: number[];           // On-chain byte array; use nameToChars() to convert strings
+  name: number[]; // On-chain byte array; use nameToChars() to convert strings
   uri: string;
   owner: PublicKey;
   portfolioManagerName: number[];
@@ -356,7 +370,7 @@ interface StateModel {
 ```typescript
 interface MintModel {
   pubkey: PublicKey;
-  name: number[];           // On-chain byte array
+  name: number[]; // On-chain byte array
   symbol: string;
   uri: string;
   decimals: number;
@@ -445,9 +459,10 @@ const [shareClassPda] = deriveShareClassPda(vaultPda: PublicKey, index: number);
 ### Constants
 
 ```typescript
-import { GLAM_PROGRAM_ID, COMMON_MINTS } from "@glamsystems/glam-sdk";
+import { GLAM_PROGRAM_ID, WSOL, MSOL, USDC, JUP } from "@glamsystems/glam-sdk";
 
-COMMON_MINTS.SOL;   // So11111111111111111111111111111111111111112
-COMMON_MINTS.USDC;  // EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
-COMMON_MINTS.USDT;  // Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
+WSOL;  // So11111111111111111111111111111111111111112
+MSOL;  // mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So
+USDC;  // EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+JUP;   // JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
 ```

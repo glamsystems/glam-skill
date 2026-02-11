@@ -96,6 +96,18 @@ glam-cli delegate revoke-all <pubkey> [--yes]
 
 ---
 
+## Fuzzy Matching
+
+Protocol and permission names support fuzzy matching:
+
+1. **Exact match** — `JupiterSwap`
+2. **Case-insensitive** — `jupiterswap` → `JupiterSwap`
+3. **Typo suggestion** — `JupiterSwp` → `Did you mean 'JupiterSwap'?`
+
+This applies to `--protocol` values and permission names in `grant` and `revoke` commands.
+
+---
+
 ## Common Patterns
 
 ### Trading Delegate Setup

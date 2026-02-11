@@ -28,24 +28,26 @@ The GLAM CLI uses a JSON configuration file.
 
 **Config options:**
 
-| Key | Required | Description |
-|-----|----------|-------------|
-| `keypair_path` | Yes | Path to keypair JSON file |
-| `json_rpc_url` | Yes | Solana JSON RPC endpoint |
-| `cluster` | Yes | `mainnet-beta`, `devnet`, or `localnet` |
-| `tx_rpc_url` | No | Separate RPC for landing transactions |
-| `jupiter_api_key` | Yes | Jupiter API key |
-| `priority_fee` | No | Priority fee config object (see below) |
-| `websocket_disabled` | No | Set `true` to disable WebSocket methods |
-| `glam_staging` | No | Set `true` to use GLAM mainnet staging programs |
-| `glam_state` | No | Default active vault state pubkey |
+| Key                  | Required | Description                                     |
+| -------------------- | -------- | ----------------------------------------------- |
+| `keypair_path`       | Yes      | Path to keypair JSON file                       |
+| `json_rpc_url`       | Yes      | Solana JSON RPC endpoint                        |
+| `cluster`            | Yes      | `mainnet-beta`, `devnet`, or `localnet`         |
+| `tx_rpc_url`         | No       | Separate RPC for landing transactions           |
+| `jupiter_api_key`    | Yes      | Jupiter API key                                 |
+| `priority_fee`       | No       | Priority fee config object (see below)          |
+| `websocket_disabled` | No       | Set `true` to disable WebSocket methods         |
+| `glam_staging`       | No       | Set `true` to use GLAM mainnet staging programs |
+| `glam_state`         | No       | Default active vault state pubkey               |
 
 **Static priority fee:**
+
 ```json
 { "priority_fee": { "micro_lamports": 10000 } }
 ```
 
 **Dynamic priority fee:**
+
 ```json
 { "priority_fee": { "level": "Medium", "helius_api_key": "your-helius-key" } }
 ```
@@ -104,7 +106,6 @@ glam-cli vault create ./vault-template.json
   "mint": {
     "name": "Fund Shares",
     "symbol": "FUND",
-    "baseAssetMint": "So11111111111111111111111111111111111111112",
     "maxCap": 1000000000000,
     "minSubscription": 1000000000,
     "minRedemption": 100000000,
@@ -113,16 +114,20 @@ glam-cli vault create ./vault-template.json
       "vault": { "subscriptionFeeBps": 10, "redemptionFeeBps": 10 },
       "manager": { "subscriptionFeeBps": 0, "redemptionFeeBps": 0 },
       "management": { "feeBps": 100 },
-      "performance": { "feeBps": 2000, "hurdleRateBps": 500, "hurdleType": "hard" }
+      "performance": {
+        "feeBps": 2000,
+        "hurdleRateBps": 500,
+        "hurdleType": "hard"
+      }
     },
     "notifyAndSettle": {
       "model": "continuous",
       "permissionlessFulfillment": false,
-      "subscribeNoticePeriodType": "soft",
+      "subscribeNoticePeriodType": "hard",
       "subscribeNoticePeriod": 0,
       "subscribeSettlementPeriod": 0,
       "subscribeCancellationWindow": 0,
-      "redeemNoticePeriodType": "soft",
+      "redeemNoticePeriodType": "hard",
       "redeemNoticePeriod": 0,
       "redeemSettlementPeriod": 0,
       "redeemCancellationWindow": 0,
@@ -137,8 +142,13 @@ glam-cli vault create ./vault-template.json
 View vault details.
 
 ```bash
-glam-cli vault view [state]
+glam-cli vault view [state] [--compact]
 ```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `-c, --compact` | Compact JSON output (no indentation) |
 
 ### `glam-cli vault list`
 
@@ -151,18 +161,23 @@ glam-cli vault list [OPTIONS]
 **Options:**
 | Flag | Description |
 |------|-------------|
-| `--all` | List all vaults (not just owned) |
-| `--owner-only` | List only vaults where signer is owner |
-| `--type <TYPE>` | Filter by type (`vault` or `tokenizedVault`) |
-| `--manager <PUBKEY>` | Filter by manager |
+| `-a, --all` | List all vaults (not just owned) |
+| `-o, --owner-only` | List only vaults where signer is owner |
+| `-t, --type <TYPE>` | Filter by type (`vault` or `tokenizedVault`) |
 
-### `glam-cli vault balances`
+### `glam-cli vault token-balances`
 
 Show vault token balances.
 
 ```bash
-glam-cli vault balances [--all]
+glam-cli vault token-balances [--all] [--json]
 ```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `-a, --all` | Show all assets including zero-balance accounts |
+| `-j, --json` | Output in JSON format |
 
 ### `glam-cli vault holdings`
 
@@ -210,15 +225,22 @@ glam-cli vault remove-asset <asset> [--yes]
 Transfer vault ownership to a new owner.
 
 ```bash
-glam-cli vault update-owner <new_owner> [--yes]
+glam-cli vault update-owner <new_owner> [--name <name>] [--yes]
 ```
 
-### `glam-cli vault set-enabled`
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `-n, --name <NAME>` | New portfolio manager name |
+| `-y, --yes` | Skip confirmation prompt |
+
+### `glam-cli vault enable` / `glam-cli vault disable`
 
 Enable or disable the vault.
 
 ```bash
-glam-cli vault set-enabled <bool> [--yes]
+glam-cli vault enable [--yes]
+glam-cli vault disable [--yes]
 ```
 
 ### `glam-cli vault extend`
@@ -228,6 +250,22 @@ Extend vault state account size (for additional data storage).
 ```bash
 glam-cli vault extend <bytes> [--yes]
 ```
+
+### `glam-cli vault close-token-accounts`
+
+Close vault token accounts (reclaim rent).
+
+```bash
+glam-cli vault close-token-accounts [mints...] [--empty] [--yes]
+```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--empty` | Close all zero-balance token accounts |
+| `-y, --yes` | Skip confirmation prompt |
+
+Provide specific mint address(es) to close those accounts, or use `--empty` to close all empty ones.
 
 ### `glam-cli vault close`
 
@@ -250,6 +288,7 @@ glam-cli integration list
 ```
 
 **Available integrations:**
+
 - `SystemProgram` - SOL wrapping and transfers
 - `JupiterSwap` - Token swaps via Jupiter aggregator
 - `DriftProtocol` - Perpetuals and spot trading
@@ -274,6 +313,8 @@ Enable integrations for the active vault.
 glam-cli integration enable <integration>...
 ```
 
+Integration names support fuzzy matching (case-insensitive, typo suggestions).
+
 **Examples:**
 
 ```bash
@@ -282,6 +323,9 @@ glam-cli integration enable JupiterSwap
 
 # Enable multiple integrations
 glam-cli integration enable JupiterSwap DriftProtocol KaminoLend
+
+# Case-insensitive matching works
+glam-cli integration enable jupiterswap
 ```
 
 ### `glam-cli integration disable`
@@ -306,7 +350,7 @@ glam-cli integration disable-all <integration_program>
 
 These options apply to all commands:
 
-| Flag | Description |
-|------|-------------|
-| `-C, --config <PATH>` | Override config file path |
+| Flag                    | Description                 |
+| ----------------------- | --------------------------- |
+| `-C, --config <PATH>`   | Override config file path   |
 | `-S, --skip-simulation` | Skip transaction simulation |

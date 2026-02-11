@@ -112,11 +112,19 @@ Protect vault with timelocked configuration changes.
 
 ### `glam-cli timelock view`
 
-View current timelock status.
+View current timelock status and pending changes.
 
 ```bash
 glam-cli timelock view
 ```
+
+**Output shows:**
+- Current timelock duration and remaining time
+- Pending state updates with detailed diffs:
+  - **integrationAcls**: Added/removed/modified integrations with protocol names
+  - **delegateAcls**: Added/removed/modified delegates with permission changes
+  - **assets / borrowable**: Added `[+]` and removed `[-]` token mints
+  - **timelockDuration**: Old → new duration
 
 ### `glam-cli timelock set`
 

@@ -1,403 +1,77 @@
 # GLAM Troubleshooting
 
-Common errors and solutions for CLI and SDK operations.
+## Installation
 
-## Table of Contents
+| Error                                        | Solution                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `EACCES: permission denied` (npm install)    | Use `npx @glamsystems/glam-cli` instead, or fix npm prefix: `npm config set prefix ~/.npm-global` |
+| `Cannot find module '@glamsystems/glam-sdk'` | Install peer deps: `npm install @solana/web3.js @coral-xyz/anchor`                                |
 
-- [Installation Issues](#installation-issues)
-- [Configuration Errors](#configuration-errors)
-- [Transaction Failures](#transaction-failures)
-- [Permission Errors](#permission-errors)
-- [RPC Issues](#rpc-issues)
-- [Integration-Specific Issues](#integration-specific-issues)
+## Configuration
 
----
+Config file: `~/.config/glam/config.json`
 
-## Installation Issues
-
-### npm install fails with permission errors
-
-**Error:**
-```
-EACCES: permission denied
-```
-
-**Solution:**
-```bash
-# Use npx instead of global install
-npx @glamsystems/glam-cli vault list
-
-# Or fix npm permissions
-npm config set prefix ~/.npm-global
-export PATH=~/.npm-global/bin:$PATH
-npm install -g @glamsystems/glam-cli
-```
-
-### Module not found errors (SDK)
-
-**Error:**
-```
-Cannot find module '@glamsystems/glam-sdk'
-```
-
-**Solution:**
-```bash
-# Ensure peer dependencies are installed
-npm install @solana/web3.js @coral-xyz/anchor
-
-# Verify installation
-npm list @glamsystems/glam-sdk
-```
-
----
-
-## Configuration Errors
-
-### Keypair not found
-
-**Error:**
-```
-Error: Keypair file not found at /path/to/keypair.json
-```
-
-**Solution:**
-```bash
-# Create/edit config file
-mkdir -p ~/.config/glam
-cat > ~/.config/glam/config.json << 'EOF'
+```json
 {
   "keypair_path": "~/.config/solana/id.json",
   "json_rpc_url": "https://api.mainnet-beta.solana.com"
 }
-EOF
-
-# Verify keypair exists
-ls -la ~/.config/solana/id.json
-
-# Create new keypair if needed
-solana-keygen new --outfile ~/.config/solana/id.json
 ```
 
-### Invalid keypair format
+| Error                                                      | Solution                                                                |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `Keypair file not found` / `keypairPath is not configured` | Create config file above. Create keypair if needed: `solana-keygen new` |
+| `Invalid secret key`                                       | Keypair must be JSON array of 64 numbers: `[123,45,67,...]`             |
 
-**Error:**
-```
-Error: Invalid secret key
-```
+## Transactions
 
-**Solution:**
-The keypair file must be a JSON array of 64 numbers. Verify format:
-```bash
-cat ~/.config/solana/id.json | head -c 100
-# Should start with: [123,45,67,...
-```
+| Error                                                               | Solution                                                                  |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `Attempt to debit an account but found no record of a prior credit` | Check `solana balance` and `glam-cli vault token-balances`                |
+| `Transaction simulation failed`                                     | Verify integration is enabled: `glam-cli vault view`                      |
+| `Transaction was not confirmed or block height exceeded/expired`    | Check if transaction is landed. Retry, or switch to a faster RPC endpoint |
+| `exceeded CUs meter at BPF instruction`                             | SDK: pass `{ computeUnitLimit: 400_000 }` as options                      |
 
-### Configuration not persisted
+## Permissions
 
-**Error:**
-```
-Error: keypairPath is not configured
-```
+| Error                                        | Solution                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `Signer is not authorized`                   | 1) Check you're using vault owner's keypair (`glam-cli vault view`) 2) Grant delegate permission 3) Enable integration |
+| `Delegate does not have required permission` | `glam-cli delegate list` to check, then `glam-cli delegate grant <PUBKEY> <PERMS> --protocol <PROTO>`                  |
+| `Asset not in vault allowlist`               | `glam-cli vault allowlist-asset <MINT> --yes`                                                                          |
 
-**Solution:**
-```bash
-# Create config file at ~/.config/glam/config.json
-mkdir -p ~/.config/glam
-cat > ~/.config/glam/config.json << 'EOF'
-{
-  "keypair_path": "~/.config/solana/id.json",
-  "json_rpc_url": "https://api.mainnet-beta.solana.com"
-}
-EOF
+## RPC
 
-# Verify configuration
-glam-cli env
-```
+| Error                    | Solution                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `429 Too Many Requests`  | Switch to a paid RPC endpoint in config                                                                   |
+| `Connection refused`     | Check RPC URL: `glam-cli env`                                                                             |
+| `Account does not exist` | Wrong vault address, vault closed, or wrong cluster. Verify with `glam-cli vault view` and `glam-cli env` |
 
----
+## Integration-Specific
 
-## Transaction Failures
+### Jupiter
 
-### Insufficient funds
+| Error                         | Solution                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `No route found for swap`     | Try smaller amount; check `glam-cli jupiter view-policy` for allowlisted tokens |
+| `Slippage tolerance exceeded` | Increase: `--slippage-bps 100` (1%), or reduce trade size                       |
 
-**Error:**
-```
-Error: Attempt to debit an account but found no record of a prior credit
-```
+### Drift
 
-**Solution:**
-- Ensure wallet has enough SOL for transaction fees
-- Check vault has sufficient token balance for the operation
+| Error                                  | Solution                                                                         |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `Drift user account not found`         | `glam-cli drift-protocol init-user --yes` (required once)                        |
+| `Insufficient collateral for position` | `glam-cli drift-protocol deposit <market_id> <amount> --yes`, or reduce position |
 
-```bash
-# Check wallet balance
-solana balance
+### Kamino
 
-# Check vault balances
-glam-cli vault balances
-```
-
-### Transaction simulation failed
-
-**Error:**
-```
-Error: Transaction simulation failed: Error processing Instruction 0
-```
-
-**Solution:**
-- Check that all required accounts exist
-- Verify integration is enabled for the operation
-
-```bash
-glam-cli vault view
-```
-
-### Blockhash expired
-
-**Error:**
-```
-Error: Transaction was not confirmed in 60.00 seconds
-```
-
-**Solution:**
-```bash
-# Retry the command, or use a faster RPC by editing ~/.config/glam/config.json
-# Update json_rpc_url to a faster endpoint
-```
-
-### Compute budget exceeded
-
-**Error:**
-```
-Error: exceeded CUs meter at BPF instruction
-```
-
-**Solution:**
-For SDK, increase compute units:
-```typescript
-await client.jupiterSwap.swap(vaultPda, params, {
-  computeUnitLimit: 400_000, // Increase from default
-});
-```
-
----
-
-## Permission Errors
-
-### Not authorized
-
-**Error:**
-```
-Error: Signer is not authorized to perform this action
-```
-
-**Causes and solutions:**
-
-1. **Wrong signer** - Ensure you're using the vault owner's keypair
-   ```bash
-   glam-cli vault view  # Check owner address
-   ```
-
-2. **Missing delegate permission** - Grant required permission with protocol scope
-   ```bash
-   glam-cli delegate grant <DELEGATE> SwapAny --protocol JupiterSwap --yes
-   ```
-
-3. **Integration not enabled** - Enable the required integration
-   ```bash
-   glam-cli integration enable JupiterSwap
-   ```
-
-### Delegate permission denied
-
-**Error:**
-```
-Error: Delegate does not have required permission
-```
-
-**Solution:**
-```bash
-# List delegate permissions
-glam-cli delegate list
-
-# Grant missing permissions (protocol-scoped)
-glam-cli delegate grant <DELEGATE> SwapAny --protocol JupiterSwap --yes
-glam-cli delegate grant <DELEGATE> Deposit Withdraw --protocol KaminoLend --yes
-```
-
-### Asset not in allowlist
-
-**Error:**
-```
-Error: Asset not in vault allowlist
-```
-
-**Solution:**
-```bash
-# Add asset to allowlist
-glam-cli vault allowlist-asset <MINT_ADDRESS> --yes
-```
-
----
-
-## RPC Issues
-
-### Rate limited
-
-**Error:**
-```
-Error: 429 Too Many Requests
-```
-
-**Solution:**
-```bash
-# Edit ~/.config/glam/config.json and update json_rpc_url to a paid endpoint
-
-# Or add delay between commands
-```
-
-### Connection refused
-
-**Error:**
-```
-Error: Connection refused
-```
-
-**Solution:**
-```bash
-# Check current RPC URL
-glam-cli env
-
-# Edit ~/.config/glam/config.json to fix json_rpc_url
-```
-
-### Account not found
-
-**Error:**
-```
-Error: Account does not exist
-```
-
-**Causes:**
-- Vault address is incorrect
-- Vault was closed
-- Using wrong cluster (mainnet vs devnet)
-
-**Solution:**
-```bash
-# Verify vault exists (set it as active first)
-glam-cli vault set <VAULT_STATE_PUBKEY>
-glam-cli vault view
-
-# Check you're on the right cluster
-glam-cli env
-```
-
----
-
-## Integration-Specific Issues
-
-### Jupiter: No route found
-
-**Error:**
-```
-Error: No route found for swap
-```
-
-**Causes:**
-- Very low liquidity for token pair
-- Amount too large or too small
-- Token not supported
-
-**Solution:**
-```bash
-# Try smaller amount
-glam-cli jupiter swap <FROM_MINT> <TO_MINT> 10 --yes
-
-# Check token is allowlisted
-glam-cli jupiter view-policy
-```
-
-### Jupiter: Slippage exceeded
-
-**Error:**
-```
-Error: Slippage tolerance exceeded
-```
-
-**Solution:**
-```bash
-# Increase slippage tolerance
-glam-cli jupiter swap <FROM_MINT> <TO_MINT> <AMOUNT> --slippage-bps 100 --yes  # 1%
-
-# Or use smaller trade size
-```
-
-### Drift: User not initialized
-
-**Error:**
-```
-Error: Drift user account not found
-```
-
-**Solution:**
-```bash
-# Initialize Drift user first
-glam-cli drift-protocol init-user --yes
-```
-
-### Drift: Insufficient collateral
-
-**Error:**
-```
-Error: Insufficient collateral for position
-```
-
-**Solution:**
-```bash
-# Deposit more collateral
-glam-cli drift-protocol deposit 0 1000 --yes
-
-# Or reduce position size
-```
-
-### Kamino: Market not found
-
-**Error:**
-```
-Error: Lending market not found
-```
-
-**Solution:**
-Use correct market address. Main Kamino markets:
-- Main Market: `7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF`
-- JLP Market: `DxXdAyU3kCjnyggvHmY5nAwg5cRbbmdyX3npfDMjjMek`
-- Altcoins: `ByYiZxp8QrdN9qbdtaAiePN8AAr3qvTPppNJDpf5DVJ5`
-
-### Kamino: Obligation not initialized
-
-**Error:**
-```
-Error: Obligation account not found
-```
-
-**Solution:**
-```bash
-# Initialize Kamino first
-glam-cli kamino-lend init --yes
-```
-
----
+| Error                          | Solution                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `Lending market not found`     | Use correct market address (Main: `7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF`) |
+| `Obligation account not found` | `glam-cli kamino-lend init --yes` (required once)                                 |
 
 ## Getting Help
 
-If you encounter issues not covered here:
-
-1. Check vault state and integrations:
-   ```bash
-   glam-cli vault view
-   ```
-
-2. Check GitHub issues: https://github.com/glamsystems/glam-cli/issues
-
-3. Contact support via Discord or documentation site
+1. Check vault state: `glam-cli vault view`
+2. GitHub issues: https://github.com/glamsystems/glam-cli/issues
