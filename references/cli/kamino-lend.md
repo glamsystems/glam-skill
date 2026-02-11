@@ -1,143 +1,122 @@
-# CLI: Kamino Lend Commands (`glam kamino-lend`)
+# CLI: Kamino Lend Commands (`glam-cli kamino-lend`)
 
 Lending and borrowing via Kamino Finance.
 
 **Prerequisite:** Enable `KaminoLend` integration before using these commands.
 
 ```bash
-glam integration enable <VAULT_ADDRESS> KaminoLend
+glam-cli integration enable KaminoLend
 ```
 
 ## Commands
 
-### `glam kamino-lend init`
+### `glam-cli kamino-lend init`
 
 Initialize Kamino lending for vault. **Required before any Kamino operations.**
 
 ```bash
-glam kamino-lend init <VAULT_ADDRESS>
+glam-cli kamino-lend init [--yes]
 ```
 
-### `glam kamino-lend deposit`
+### `glam-cli kamino-lend deposit`
 
 Deposit to Kamino lending market.
 
 ```bash
-glam kamino-lend deposit <VAULT_ADDRESS> [OPTIONS]
+glam-cli kamino-lend deposit <market> <asset> <amount> [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market <ADDRESS>` | Lending market address |
-| `--mint <MINT>` | Token mint to deposit |
-| `--amount <AMOUNT>` | Amount to deposit |
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `market` | Lending market address |
+| `asset` | Token mint to deposit |
+| `amount` | Amount to deposit |
 
 **Example:**
 
 ```bash
 # Deposit 1000 USDC to main market
-glam kamino-lend deposit <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --amount 1000
+glam-cli kamino-lend deposit \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  1000
 ```
 
-### `glam kamino-lend withdraw`
+### `glam-cli kamino-lend withdraw`
 
 Withdraw from Kamino lending market.
 
 ```bash
-glam kamino-lend withdraw <VAULT_ADDRESS> [OPTIONS]
+glam-cli kamino-lend withdraw <market> <asset> <amount> [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market <ADDRESS>` | Lending market address |
-| `--mint <MINT>` | Token mint to withdraw |
-| `--amount <AMOUNT>` | Amount to withdraw |
-
-### `glam kamino-lend borrow`
+### `glam-cli kamino-lend borrow`
 
 Borrow from Kamino lending market.
 
 ```bash
-glam kamino-lend borrow <VAULT_ADDRESS> [OPTIONS]
+glam-cli kamino-lend borrow <market> <asset> <amount> [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market <ADDRESS>` | Lending market address |
-| `--mint <MINT>` | Token mint to borrow |
-| `--amount <AMOUNT>` | Amount to borrow |
-
-### `glam kamino-lend repay`
+### `glam-cli kamino-lend repay`
 
 Repay Kamino loan.
 
 ```bash
-glam kamino-lend repay <VAULT_ADDRESS> [OPTIONS]
+glam-cli kamino-lend repay <market> <asset> <amount> [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market <ADDRESS>` | Lending market address |
-| `--mint <MINT>` | Token mint to repay |
-| `--amount <AMOUNT>` | Amount to repay |
-
-### `glam kamino-lend list`
+### `glam-cli kamino-lend list`
 
 List Kamino lending positions.
 
 ```bash
-glam kamino-lend list <VAULT_ADDRESS>
+glam-cli kamino-lend list
 ```
 
 ---
 
 ## Policy Commands
 
-### `glam kamino-lend view-policy`
+### `glam-cli kamino-lend view-policy`
 
 View Kamino lending policy settings for the vault.
 
 ```bash
-glam kamino-lend view-policy <VAULT_ADDRESS>
+glam-cli kamino-lend view-policy
 ```
 
-### `glam kamino-lend allowlist-market`
+### `glam-cli kamino-lend allowlist-market`
 
 Add a lending market to the allowlist.
 
 ```bash
-glam kamino-lend allowlist-market <VAULT_ADDRESS> <MARKET_ADDRESS>
+glam-cli kamino-lend allowlist-market <market> [--yes]
 ```
 
-### `glam kamino-lend remove-market`
+### `glam-cli kamino-lend remove-market`
 
 Remove a lending market from the allowlist.
 
 ```bash
-glam kamino-lend remove-market <VAULT_ADDRESS> <MARKET_ADDRESS>
+glam-cli kamino-lend remove-market <market> [--yes]
 ```
 
-### `glam kamino-lend allowlist-borrowable-asset`
+### `glam-cli kamino-lend allowlist-borrowable-asset`
 
 Add an asset to the borrowable allowlist.
 
 ```bash
-glam kamino-lend allowlist-borrowable-asset <VAULT_ADDRESS> <MINT_ADDRESS>
+glam-cli kamino-lend allowlist-borrowable-asset <asset> [--yes]
 ```
 
-### `glam kamino-lend remove-borrowable-asset`
+### `glam-cli kamino-lend remove-borrowable-asset`
 
 Remove an asset from the borrowable allowlist.
 
 ```bash
-glam kamino-lend remove-borrowable-asset <VAULT_ADDRESS> <MINT_ADDRESS>
+glam-cli kamino-lend remove-borrowable-asset <asset> [--yes]
 ```
 
 ---
@@ -156,35 +135,35 @@ glam kamino-lend remove-borrowable-asset <VAULT_ADDRESS> <MINT_ADDRESS>
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> KaminoLend
+glam-cli integration enable KaminoLend
 
 # 2. Initialize (required once)
-glam kamino-lend init <VAULT>
+glam-cli kamino-lend init
 
 # 3. Deposit collateral
-glam kamino-lend deposit <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --amount 5000
+glam-cli kamino-lend deposit \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  5000
 
 # 4. Borrow against collateral
-glam kamino-lend borrow <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint So11111111111111111111111111111111111111112 \
-  --amount 10
+glam-cli kamino-lend borrow \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  So11111111111111111111111111111111111111112 \
+  10
 
 # 5. Monitor positions
-glam kamino-lend list <VAULT>
+glam-cli kamino-lend list
 
 # 6. Repay loan
-glam kamino-lend repay <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint So11111111111111111111111111111111111111112 \
-  --amount 10
+glam-cli kamino-lend repay \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  So11111111111111111111111111111111111111112 \
+  10
 
 # 7. Withdraw collateral
-glam kamino-lend withdraw <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --amount 5000
+glam-cli kamino-lend withdraw \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  5000
 ```

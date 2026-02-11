@@ -6,17 +6,17 @@ Stake tokens in Kamino farms to earn rewards.
 
 ```bash
 # Enable the integration first
-glam integration enable <VAULT> KaminoFarm
+glam-cli integration enable KaminoFarms
 ```
 
 ## Commands
 
-### `glam kamino-farms list`
+### `glam-cli kamino-farms list`
 
 List Kamino farms where your vault has unclaimed rewards.
 
 ```bash
-glam kamino-farms list
+glam-cli kamino-farms list
 ```
 
 **Output shows:**
@@ -24,12 +24,12 @@ glam kamino-farms list
 - Reward token mint
 - Unclaimed reward amount
 
-### `glam kamino-farms stake`
+### `glam-cli kamino-farms stake`
 
 Stake tokens to a Kamino farm.
 
 ```bash
-glam kamino-farms stake <FARM_STATE> <AMOUNT>
+glam-cli kamino-farms stake <FARM_STATE> <AMOUNT> [--yes]
 ```
 
 **Arguments:**
@@ -46,38 +46,38 @@ glam kamino-farms stake <FARM_STATE> <AMOUNT>
 **Example:**
 ```bash
 # Stake 100 tokens to a farm
-glam kamino-farms stake FarmState111... 100
+glam-cli kamino-farms stake FarmState111... 100
 ```
 
-### `glam kamino-farms unstake`
+### `glam-cli kamino-farms unstake`
 
 Unstake tokens from a Kamino farm.
 
 ```bash
-glam kamino-farms unstake <FARM_STATE> <AMOUNT>
+glam-cli kamino-farms unstake <FARM_STATE> <AMOUNT> [--yes]
 ```
 
 **Example:**
 ```bash
 # Unstake 50 tokens from a farm
-glam kamino-farms unstake FarmState111... 50
+glam-cli kamino-farms unstake FarmState111... 50
 ```
 
-### `glam kamino-farms harvest`
+### `glam-cli kamino-farms harvest`
 
 Harvest (claim) rewards from one or more farms.
 
 ```bash
-glam kamino-farms harvest <FARM_STATE...>
+glam-cli kamino-farms harvest <FARM_STATE...> [--yes]
 ```
 
 **Example:**
 ```bash
 # Harvest from single farm
-glam kamino-farms harvest FarmState111...
+glam-cli kamino-farms harvest FarmState111...
 
 # Harvest from multiple farms at once
-glam kamino-farms harvest FarmState111... FarmState222... FarmState333...
+glam-cli kamino-farms harvest FarmState111... FarmState222... FarmState333...
 ```
 
 ---
@@ -86,19 +86,19 @@ glam kamino-farms harvest FarmState111... FarmState222... FarmState333...
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> KaminoFarm
+glam-cli integration enable KaminoFarms
 
 # 2. Stake tokens to earn rewards
-glam kamino-farms stake <FARM_STATE> 1000
+glam-cli kamino-farms stake <FARM_STATE> 1000
 
 # 3. Check unclaimed rewards
-glam kamino-farms list
+glam-cli kamino-farms list
 
 # 4. Harvest rewards
-glam kamino-farms harvest <FARM_STATE>
+glam-cli kamino-farms harvest <FARM_STATE>
 
 # 5. When done: unstake
-glam kamino-farms unstake <FARM_STATE> 1000
+glam-cli kamino-farms unstake <FARM_STATE> 1000
 ```
 
 ---

@@ -111,7 +111,7 @@ cat > ~/.config/glam/config.json << 'EOF'
 EOF
 
 # Verify configuration
-glam env
+glam-cli env
 ```
 
 ---
@@ -134,7 +134,7 @@ Error: Attempt to debit an account but found no record of a prior credit
 solana balance
 
 # Check vault balances
-glam vault balances <VAULT_ADDRESS>
+glam-cli vault balances
 ```
 
 ### Transaction simulation failed
@@ -145,12 +145,11 @@ Error: Transaction simulation failed: Error processing Instruction 0
 ```
 
 **Solution:**
-- Run with `--dry-run` to see detailed error
 - Check that all required accounts exist
 - Verify integration is enabled for the operation
 
 ```bash
-glam jupiter swap <VAULT> --input-mint <A> --output-mint <B> --amount 100 --dry-run
+glam-cli vault view
 ```
 
 ### Blockhash expired
@@ -162,10 +161,7 @@ Error: Transaction was not confirmed in 60.00 seconds
 
 **Solution:**
 ```bash
-# Retry with higher priority fee
-glam jupiter swap <VAULT> ... --priority-fee 50000
-
-# Or use a faster RPC by editing ~/.config/glam/config.json
+# Retry the command, or use a faster RPC by editing ~/.config/glam/config.json
 # Update json_rpc_url to a faster endpoint
 ```
 
@@ -180,7 +176,7 @@ Error: exceeded CUs meter at BPF instruction
 For SDK, increase compute units:
 ```typescript
 await client.jupiterSwap.swap(vaultPda, params, {
-  computeUnits: 400000, // Increase from default
+  computeUnitLimit: 400_000, // Increase from default
 });
 ```
 
@@ -197,19 +193,19 @@ Error: Signer is not authorized to perform this action
 
 **Causes and solutions:**
 
-1. **Wrong signer** - Ensure you're using the vault manager's keypair
+1. **Wrong signer** - Ensure you're using the vault owner's keypair
    ```bash
-   glam vault view <VAULT_ADDRESS>  # Check manager address
+   glam-cli vault view  # Check owner address
    ```
 
-2. **Missing delegate permission** - Grant required permission
+2. **Missing delegate permission** - Grant required permission with protocol scope
    ```bash
-   glam delegate grant <VAULT> <DELEGATE> --permissions Swap
+   glam-cli delegate grant <DELEGATE> SwapAny --protocol JupiterSwap --yes
    ```
 
 3. **Integration not enabled** - Enable the required integration
    ```bash
-   glam integration enable <VAULT> JupiterSwap
+   glam-cli integration enable JupiterSwap
    ```
 
 ### Delegate permission denied
@@ -222,10 +218,11 @@ Error: Delegate does not have required permission
 **Solution:**
 ```bash
 # List delegate permissions
-glam delegate list <VAULT_ADDRESS>
+glam-cli delegate list
 
-# Grant missing permissions
-glam delegate grant <VAULT> <DELEGATE> --permissions Swap,KaminoDeposit
+# Grant missing permissions (protocol-scoped)
+glam-cli delegate grant <DELEGATE> SwapAny --protocol JupiterSwap --yes
+glam-cli delegate grant <DELEGATE> Deposit Withdraw --protocol KaminoLend --yes
 ```
 
 ### Asset not in allowlist
@@ -238,7 +235,7 @@ Error: Asset not in vault allowlist
 **Solution:**
 ```bash
 # Add asset to allowlist
-glam vault allowlist-asset <VAULT_ADDRESS> <MINT_ADDRESS>
+glam-cli vault allowlist-asset <MINT_ADDRESS> --yes
 ```
 
 ---
@@ -255,7 +252,6 @@ Error: 429 Too Many Requests
 **Solution:**
 ```bash
 # Edit ~/.config/glam/config.json and update json_rpc_url to a paid endpoint
-# Or use -C flag: glam -C /path/to/config.json <command>
 
 # Or add delay between commands
 ```
@@ -270,7 +266,7 @@ Error: Connection refused
 **Solution:**
 ```bash
 # Check current RPC URL
-glam env
+glam-cli env
 
 # Edit ~/.config/glam/config.json to fix json_rpc_url
 ```
@@ -289,11 +285,12 @@ Error: Account does not exist
 
 **Solution:**
 ```bash
-# Verify vault exists
-glam vault view <VAULT_ADDRESS>
+# Verify vault exists (set it as active first)
+glam-cli vault set <VAULT_STATE_PUBKEY>
+glam-cli vault view
 
 # Check you're on the right cluster
-glam env
+glam-cli env
 ```
 
 ---
@@ -315,13 +312,10 @@ Error: No route found for swap
 **Solution:**
 ```bash
 # Try smaller amount
-glam jupiter swap <VAULT> ... --amount 10
-
-# Use only direct routes
-glam jupiter swap <VAULT> ... --only-direct-routes
+glam-cli jupiter swap <FROM_MINT> <TO_MINT> 10 --yes
 
 # Check token is allowlisted
-glam jupiter view-policy <VAULT>
+glam-cli jupiter view-policy
 ```
 
 ### Jupiter: Slippage exceeded
@@ -334,7 +328,7 @@ Error: Slippage tolerance exceeded
 **Solution:**
 ```bash
 # Increase slippage tolerance
-glam jupiter swap <VAULT> ... --slippage 100  # 1%
+glam-cli jupiter swap <FROM_MINT> <TO_MINT> <AMOUNT> --slippage-bps 100 --yes  # 1%
 
 # Or use smaller trade size
 ```
@@ -349,7 +343,7 @@ Error: Drift user account not found
 **Solution:**
 ```bash
 # Initialize Drift user first
-glam drift-protocol init-user <VAULT_ADDRESS>
+glam-cli drift-protocol init-user --yes
 ```
 
 ### Drift: Insufficient collateral
@@ -362,7 +356,7 @@ Error: Insufficient collateral for position
 **Solution:**
 ```bash
 # Deposit more collateral
-glam drift-protocol deposit <VAULT> --market-index 0 --amount 1000
+glam-cli drift-protocol deposit 0 1000 --yes
 
 # Or reduce position size
 ```
@@ -390,7 +384,7 @@ Error: Obligation account not found
 **Solution:**
 ```bash
 # Initialize Kamino first
-glam kamino-lend init <VAULT_ADDRESS>
+glam-cli kamino-lend init --yes
 ```
 
 ---
@@ -401,19 +395,9 @@ If you encounter issues not covered here:
 
 1. Check vault state and integrations:
    ```bash
-   glam vault view <VAULT_ADDRESS>
+   glam-cli vault view
    ```
 
-2. Run command with verbose output:
-   ```bash
-   glam <command> --verbose
-   ```
+2. Check GitHub issues: https://github.com/glamsystems/glam-cli/issues
 
-3. Use dry-run to simulate:
-   ```bash
-   glam <command> --dry-run
-   ```
-
-4. Check GitHub issues: https://github.com/glamsystems/glam-cli/issues
-
-5. Contact support via Discord or documentation site
+3. Contact support via Discord or documentation site

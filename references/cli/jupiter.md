@@ -5,98 +5,95 @@ Token swaps via Jupiter aggregator.
 **Prerequisite:** Enable `JupiterSwap` integration before using these commands.
 
 ```bash
-glam integration enable <VAULT_ADDRESS> JupiterSwap
+glam-cli integration enable JupiterSwap
 ```
 
 ## Commands
 
-### `glam jupiter swap`
+### `glam-cli jupiter swap`
 
 Execute token swap via Jupiter.
 
 ```bash
-glam jupiter swap <VAULT_ADDRESS> [OPTIONS]
+glam-cli jupiter swap <from> <to> <amount> [OPTIONS] [--yes]
 ```
 
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `from` | Input token mint |
+| `to` | Output token mint |
+| `amount` | Amount in token units |
+
 **Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--input-mint <MINT>` | Input token mint | Yes |
-| `--output-mint <MINT>` | Output token mint | Yes |
-| `--amount <AMOUNT>` | Amount in token units | Yes |
-| `--slippage <BPS>` | Slippage tolerance in basis points | No (default: 50) |
-| `--only-direct-routes` | Use only direct routes | No |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--slippage-bps <BPS>` | Slippage tolerance in basis points | 50 |
+| `--only-direct-routes` | Use only direct routes | false |
+| `-y, --yes` | Skip confirmation prompt | - |
 
 **Examples:**
 
 ```bash
 # Swap 100 USDC to SOL with 0.5% slippage
-glam jupiter swap <VAULT> \
-  --input-mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --output-mint So11111111111111111111111111111111111111112 \
-  --amount 100 \
-  --slippage 50
+glam-cli jupiter swap \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  So11111111111111111111111111111111111111112 \
+  100 \
+  --slippage-bps 50
 
 # Swap with 1% slippage
-glam jupiter swap <VAULT> \
-  --input-mint <INPUT> \
-  --output-mint <OUTPUT> \
-  --amount 1000 \
-  --slippage 100
+glam-cli jupiter swap <INPUT> <OUTPUT> 1000 --slippage-bps 100
 
 # Use direct routes only (less hops, potentially worse price)
-glam jupiter swap <VAULT> \
-  --input-mint <INPUT> \
-  --output-mint <OUTPUT> \
-  --amount 1000 \
-  --only-direct-routes
+glam-cli jupiter swap <INPUT> <OUTPUT> 1000 --only-direct-routes
 ```
 
-### `glam jupiter view-policy`
+### `glam-cli jupiter view-policy`
 
 View vault's Jupiter swap policy (max slippage, allowlisted tokens).
 
 ```bash
-glam jupiter view-policy <VAULT_ADDRESS>
+glam-cli jupiter view-policy
 ```
 
-### `glam jupiter set-max-slippage`
+### `glam-cli jupiter set-max-slippage`
 
 Set maximum slippage for swaps.
 
 ```bash
-glam jupiter set-max-slippage <VAULT_ADDRESS> --max-slippage <BPS>
+glam-cli jupiter set-max-slippage <slippage_bps> [--yes]
 ```
 
 **Example:**
 
 ```bash
 # Set max slippage to 1% (100 basis points)
-glam jupiter set-max-slippage <VAULT> --max-slippage 100
+glam-cli jupiter set-max-slippage 100
 ```
 
-### `glam jupiter allowlist-token`
+### `glam-cli jupiter allowlist-token`
 
 Add token to swap allowlist.
 
 ```bash
-glam jupiter allowlist-token <VAULT_ADDRESS> <MINT_ADDRESS>
+glam-cli jupiter allowlist-token <token_mint> [--yes]
 ```
 
-### `glam jupiter remove-token`
+### `glam-cli jupiter remove-token`
 
 Remove a token from the swap allowlist.
 
 ```bash
-glam jupiter remove-token <VAULT_ADDRESS> <MINT_ADDRESS>
+glam-cli jupiter remove-token <token_mint> [--yes]
 ```
 
-### `glam jupiter clear-allowlist`
+### `glam-cli jupiter clear-allowlist`
 
 Clear all tokens from the swap allowlist.
 
 ```bash
-glam jupiter clear-allowlist <VAULT_ADDRESS>
+glam-cli jupiter clear-allowlist [--yes]
 ```
 
 ---

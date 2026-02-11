@@ -1,210 +1,218 @@
-# CLI: Drift Protocol Commands (`glam drift-protocol`)
+# CLI: Drift Protocol Commands (`glam-cli drift-protocol`)
 
 Perpetuals and spot trading via Drift Protocol.
 
 **Prerequisite:** Enable `DriftProtocol` integration before using these commands.
 
 ```bash
-glam integration enable <VAULT_ADDRESS> DriftProtocol
+glam-cli integration enable DriftProtocol
 ```
 
 ## Commands
 
-### `glam drift-protocol init-user`
+### `glam-cli drift-protocol init-user`
 
 Initialize Drift user account for vault. **Required before any Drift operations.**
 
 ```bash
-glam drift-protocol init-user <VAULT_ADDRESS>
+glam-cli drift-protocol init-user [--sub-account-id <id>] [--pool-id <id>] [--yes]
 ```
 
-### `glam drift-protocol deposit`
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--sub-account-id <ID>` | Sub-account ID (for multiple Drift accounts) |
+| `--pool-id <ID>` | Pool ID to assign user to |
+| `-y, --yes` | Skip confirmation prompt |
+
+### `glam-cli drift-protocol deposit`
 
 Deposit collateral to Drift.
 
 ```bash
-glam drift-protocol deposit <VAULT_ADDRESS> --market-index <INDEX> --amount <AMOUNT>
+glam-cli drift-protocol deposit <market_index> <amount> [--sub-account-id <id>] [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market-index <INDEX>` | Spot market index (0=USDC, 1=SOL, etc.) |
-| `--amount <AMOUNT>` | Amount to deposit |
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `market_index` | Spot market index (0=USDC, 1=SOL, etc.) |
+| `amount` | Amount to deposit |
 
-### `glam drift-protocol withdraw`
+### `glam-cli drift-protocol withdraw`
 
 Withdraw collateral from Drift.
 
 ```bash
-glam drift-protocol withdraw <VAULT_ADDRESS> --market-index <INDEX> --amount <AMOUNT>
+glam-cli drift-protocol withdraw <market_index> <amount> [--sub-account-id <id>] [--yes]
 ```
 
-### `glam drift-protocol spot`
+### `glam-cli drift-protocol spot`
 
 Place spot market order.
 
 ```bash
-glam drift-protocol spot <VAULT_ADDRESS> [OPTIONS]
+glam-cli drift-protocol spot <direction> <market_index> <amount> <price_limit> [--sub-account-id <id>] [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market-index <INDEX>` | Spot market index |
-| `--amount <AMOUNT>` | Order size |
-| `--direction <DIR>` | `long` or `short` |
-| `--price <PRICE>` | Limit price (optional) |
-| `--reduce-only` | Reduce only flag |
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `direction` | `long` or `short` |
+| `market_index` | Spot market index |
+| `amount` | Order size |
+| `price_limit` | Limit price |
 
-### `glam drift-protocol perp`
+### `glam-cli drift-protocol perp`
 
 Place perpetual market order.
 
 ```bash
-glam drift-protocol perp <VAULT_ADDRESS> [OPTIONS]
+glam-cli drift-protocol perp <direction> <market_index> <amount> <price_limit> [--sub-account-id <id>] [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--market-index <INDEX>` | Perp market index (0=SOL-PERP) |
-| `--amount <AMOUNT>` | Order size in base units |
-| `--direction <DIR>` | `long` or `short` |
-| `--price <PRICE>` | Limit price (optional) |
-| `--reduce-only` | Reduce only flag |
-| `--post-only` | Post only flag |
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `direction` | `long` or `short` |
+| `market_index` | Perp market index (0=SOL-PERP) |
+| `amount` | Order size in base units |
+| `price_limit` | Limit price |
 
 **Examples:**
 
 ```bash
 # Long 1 SOL-PERP at market
-glam drift-protocol perp <VAULT> --market-index 0 --amount 1 --direction long
+glam-cli drift-protocol perp long 0 1 0
 
 # Short 0.5 SOL-PERP with limit price
-glam drift-protocol perp <VAULT> --market-index 0 --amount 0.5 --direction short --price 100
+glam-cli drift-protocol perp short 0 0.5 100
 
-# Close position (reduce only)
-glam drift-protocol perp <VAULT> --market-index 0 --amount 1 --direction short --reduce-only
+# Close position
+glam-cli drift-protocol perp short 0 1 0
 ```
 
-### `glam drift-protocol list-positions`
+### `glam-cli drift-protocol list-positions`
 
-List open positions and orders.
+List open positions.
 
 ```bash
-glam drift-protocol list-positions <VAULT_ADDRESS>
+glam-cli drift-protocol list-positions [--sub-account-id <id>]
 ```
 
-### `glam drift-protocol list-orders`
+### `glam-cli drift-protocol list-orders`
 
 List open orders.
 
 ```bash
-glam drift-protocol list-orders <VAULT_ADDRESS>
+glam-cli drift-protocol list-orders [--sub-account-id <id>]
 ```
 
-### `glam drift-protocol list-users`
+### `glam-cli drift-protocol list-users`
 
 List Drift sub-accounts for the vault.
 
 ```bash
-glam drift-protocol list-users <VAULT_ADDRESS>
+glam-cli drift-protocol list-users
 ```
 
-### `glam drift-protocol cancel`
+### `glam-cli drift-protocol cancel`
 
 Cancel Drift order(s).
 
 ```bash
-glam drift-protocol cancel <VAULT_ADDRESS> [OPTIONS]
+glam-cli drift-protocol cancel <order_ids...> [--sub-account-id <id>] [--yes]
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--order-id <ID>` | Specific order ID to cancel |
-| `--market-index <INDEX>` | Cancel all orders for market |
-| `--all` | Cancel all orders |
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `order_ids` | One or more order IDs to cancel |
 
 ---
 
 ## Policy Commands
 
-### `glam drift-protocol view-policy`
+### `glam-cli drift-protocol view-policy`
 
 View Drift policy settings for the vault.
 
 ```bash
-glam drift-protocol view-policy <VAULT_ADDRESS>
+glam-cli drift-protocol view-policy
 ```
 
-### `glam drift-protocol allowlist-market`
+### `glam-cli drift-protocol allowlist-market`
 
 Add a market to the Drift allowlist.
 
 ```bash
-glam drift-protocol allowlist-market <VAULT_ADDRESS> <MARKET_INDEX>
+glam-cli drift-protocol allowlist-market <spot|perp> <market_index> [--yes]
 ```
 
-### `glam drift-protocol remove-market`
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `spot\|perp` | Market type |
+| `market_index` | Market index to allowlist |
+
+### `glam-cli drift-protocol remove-market`
 
 Remove a market from the Drift allowlist.
 
 ```bash
-glam drift-protocol remove-market <VAULT_ADDRESS> <MARKET_INDEX>
+glam-cli drift-protocol remove-market <spot|perp> <market_index> [--yes]
 ```
 
-### `glam drift-protocol allowlist-borrowable-asset`
+### `glam-cli drift-protocol allowlist-borrowable-asset`
 
 Add an asset to the borrowable allowlist.
 
 ```bash
-glam drift-protocol allowlist-borrowable-asset <VAULT_ADDRESS> <MARKET_INDEX>
+glam-cli drift-protocol allowlist-borrowable-asset <token_mint> [--yes]
 ```
 
-### `glam drift-protocol remove-borrowable-asset`
+### `glam-cli drift-protocol remove-borrowable-asset`
 
 Remove an asset from the borrowable allowlist.
 
 ```bash
-glam drift-protocol remove-borrowable-asset <VAULT_ADDRESS> <MARKET_INDEX>
+glam-cli drift-protocol remove-borrowable-asset <token_mint> [--yes]
 ```
 
 ---
 
 ## User Management Commands
 
-### `glam drift-protocol margin`
+### `glam-cli drift-protocol margin`
 
 Enable or disable margin trading for the Drift user.
 
 ```bash
-glam drift-protocol margin <VAULT_ADDRESS> <true|false>
+glam-cli drift-protocol margin <bool> [--sub-account-id <id>] [--yes]
 ```
 
-### `glam drift-protocol settle`
+### `glam-cli drift-protocol settle`
 
 Settle PnL for a market.
 
 ```bash
-glam drift-protocol settle <VAULT_ADDRESS> --market-index <INDEX>
+glam-cli drift-protocol settle <market_index> [--sub-account-id <id>]
 ```
 
-### `glam drift-protocol delete-user`
+### `glam-cli drift-protocol delete-user`
 
 Delete a Drift user account.
 
 ```bash
-glam drift-protocol delete-user <VAULT_ADDRESS>
+glam-cli drift-protocol delete-user <sub_account_id> [--yes]
 ```
 
-### `glam drift-protocol update-user-pool-id`
+### `glam-cli drift-protocol update-user-pool-id`
 
 Update the user pool ID.
 
 ```bash
-glam drift-protocol update-user-pool-id <VAULT_ADDRESS> <POOL_ID>
+glam-cli drift-protocol update-user-pool-id <sub_account_id> <pool_id> [--yes]
 ```
 
 ---
@@ -233,20 +241,20 @@ glam drift-protocol update-user-pool-id <VAULT_ADDRESS> <POOL_ID>
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> DriftProtocol
+glam-cli integration enable DriftProtocol
 
 # 2. Initialize user (required once)
-glam drift-protocol init-user <VAULT>
+glam-cli drift-protocol init-user
 
 # 3. Deposit collateral
-glam drift-protocol deposit <VAULT> --market-index 0 --amount 1000  # 1000 USDC
+glam-cli drift-protocol deposit 0 1000  # 1000 USDC
 
 # 4. Open position
-glam drift-protocol perp <VAULT> --market-index 0 --amount 1 --direction long
+glam-cli drift-protocol perp long 0 1 0
 
 # 5. Monitor positions
-glam drift-protocol list-positions <VAULT>
+glam-cli drift-protocol list-positions
 
 # 6. Close position
-glam drift-protocol perp <VAULT> --market-index 0 --amount 1 --direction short --reduce-only
+glam-cli drift-protocol perp short 0 1 0
 ```

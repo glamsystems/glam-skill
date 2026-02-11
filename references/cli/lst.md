@@ -1,39 +1,43 @@
 # CLI: LST (Liquid Staking Tokens)
 
-> **⚠️ WARNING: Development Only**
+> **Warning: Unaudited Integration**
 >
-> The `glam lst` commands are **unaudited** and require `NODE_ENV=development` flag to use. Do not use in production without thorough testing and security review.
+> The `glam-cli lst` commands use **unaudited** integrations and require BOTH:
+> 1. `NODE_ENV=development` environment variable
+> 2. `--bypass-warning` (or `-b`) flag on the parent command
 >
 > ```bash
-> NODE_ENV=development glam lst stake <STAKEPOOL> 100
+> NODE_ENV=development glam-cli lst --bypass-warning stake <STAKEPOOL> 100
 > ```
 
-Stake SOL into SPL stake pools to receive liquid staking tokens.
+Stake SOL into SPL stake pools or Sanctum pools to receive liquid staking tokens.
 
-> **Note:** This is for generic SPL stake pools. For Marinade-specific staking, see [staking.md](./staking.md).
+> **Note:** For Marinade-specific staking, see [staking.md](./staking.md).
 
 ## Prerequisites
 
 ```bash
-# Enable the integration first
-glam integration enable <VAULT> SplStakePool
+# Enable the integration first (use exact protocol name)
+glam-cli integration enable StakePool        # For SPL stake pools
+glam-cli integration enable SanctumSingle    # For Sanctum single-validator pools
+glam-cli integration enable SanctumMulti     # For Sanctum multi-validator pools
 ```
 
 ## Commands
 
-### `glam lst stake`
+### `glam-cli lst stake`
 
 Stake SOL into a stake pool to receive LST.
 
 ```bash
-glam lst stake <STAKEPOOL> <AMOUNT>
+NODE_ENV=development glam-cli lst --bypass-warning stake <stakepool> <amount> [--yes]
 ```
 
 **Arguments:**
 | Argument | Description |
 |----------|-------------|
-| `STAKEPOOL` | Stake pool address |
-| `AMOUNT` | Amount of SOL to stake |
+| `stakepool` | Stake pool address |
+| `amount` | Amount of SOL to stake |
 
 **Options:**
 | Flag | Description |
@@ -42,23 +46,22 @@ glam lst stake <STAKEPOOL> <AMOUNT>
 
 **Example:**
 ```bash
-# Stake 10 SOL into a stake pool
-glam lst stake StakePoolAddress111... 10
+NODE_ENV=development glam-cli lst -b stake StakePoolAddress111... 10
 ```
 
-### `glam lst unstake`
+### `glam-cli lst unstake`
 
 Unstake LST to receive SOL in a stake account.
 
 ```bash
-glam lst unstake <LST_MINT> <AMOUNT> [OPTIONS]
+NODE_ENV=development glam-cli lst --bypass-warning unstake <asset> <amount> [OPTIONS] [--yes]
 ```
 
 **Arguments:**
 | Argument | Description |
 |----------|-------------|
-| `LST_MINT` | LST token mint address |
-| `AMOUNT` | Amount of LST to unstake |
+| `asset` | LST token mint address |
+| `amount` | Amount of LST to unstake |
 
 **Options:**
 | Flag | Description |
@@ -69,10 +72,10 @@ glam lst unstake <LST_MINT> <AMOUNT> [OPTIONS]
 **Example:**
 ```bash
 # Unstake 5 LST tokens
-glam lst unstake LstMintAddress111... 5
+NODE_ENV=development glam-cli lst -b unstake LstMintAddress111... 5
 
 # Unstake and deactivate stake account
-glam lst unstake LstMintAddress111... 5 --deactivate
+NODE_ENV=development glam-cli lst -b unstake LstMintAddress111... 5 --deactivate
 ```
 
 ---
@@ -81,13 +84,13 @@ glam lst unstake LstMintAddress111... 5 --deactivate
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> SplStakePool
+glam-cli integration enable StakePool
 
 # 2. Stake SOL to receive LST
-glam lst stake <STAKEPOOL_ADDRESS> 100
+NODE_ENV=development glam-cli lst --bypass-warning stake <STAKEPOOL_ADDRESS> 100
 
 # 3. Later: unstake to get SOL back
-glam lst unstake <LST_MINT> 100 --deactivate
+NODE_ENV=development glam-cli lst --bypass-warning unstake <LST_MINT> 100 --deactivate
 ```
 
 ---
@@ -96,7 +99,7 @@ glam lst unstake <LST_MINT> 100 --deactivate
 
 | Pool | Description |
 |------|-------------|
-| Marinade | mSOL - use `glam marinade` commands instead |
+| Marinade | mSOL - use `glam-cli marinade` commands instead |
 | Jito | jitoSOL |
 | BlazeStake | bSOL |
 | Sanctum | Various LSTs |
@@ -107,4 +110,4 @@ glam lst unstake <LST_MINT> 100 --deactivate
 
 - **Unstake delay**: Unstaking typically has an epoch delay (~2-3 days)
 - **Stake accounts**: Unstaking creates stake accounts that need deactivation
-- **Different from Marinade**: For Marinade, use `glam marinade` commands which have additional features
+- **Different from Marinade**: For Marinade, use `glam-cli marinade` commands which have additional features

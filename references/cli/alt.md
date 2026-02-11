@@ -6,20 +6,20 @@ Manage Address Lookup Tables to optimize transaction sizes.
 
 ## Commands
 
-### `glam alt list`
+### `glam-cli alt list`
 
 List address lookup tables owned by the vault.
 
 ```bash
-glam alt list
+glam-cli alt list
 ```
 
-### `glam alt create`
+### `glam-cli alt create`
 
 Create a new address lookup table for the vault.
 
 ```bash
-glam alt create
+glam-cli alt create [--yes]
 ```
 
 **Options:**
@@ -29,12 +29,12 @@ glam alt create
 
 **Note:** Requires `GLAM_API` environment variable to be set.
 
-### `glam alt extend`
+### `glam-cli alt extend`
 
 Extend an existing lookup table with additional addresses.
 
 ```bash
-glam alt extend <TABLE>
+glam-cli alt extend <TABLE> [--yes]
 ```
 
 **Arguments:**
@@ -60,13 +60,13 @@ ALTs are useful when:
 
 ```bash
 # 1. Check existing lookup tables
-glam alt list
+glam-cli alt list
 
 # 2. Create new lookup table if needed
-glam alt create
+glam-cli alt create
 
 # 3. Extend with more addresses if needed
-glam alt extend <TABLE_ADDRESS>
+glam-cli alt extend <TABLE_ADDRESS>
 ```
 
 ---

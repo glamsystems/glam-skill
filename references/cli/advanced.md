@@ -6,20 +6,29 @@ CCTP cross-chain bridging and timelock operations.
 
 Bridge USDC between chains via Circle's Cross-Chain Transfer Protocol.
 
-### `glam cctp bridge-usdc`
+### `glam-cli cctp bridge-usdc`
 
 Bridge USDC to another chain.
 
 ```bash
-glam cctp bridge-usdc <VAULT_ADDRESS> [OPTIONS]
+glam-cli cctp bridge-usdc <amount> <domain> <destination_address> [OPTIONS] [--yes]
 ```
+
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `amount` | USDC amount to bridge |
+| `domain` | Target destination domain ID |
+| `destination_address` | Destination address on target chain |
 
 **Options:**
 | Flag | Description |
 |------|-------------|
-| `--destination <ADDRESS>` | Destination address on target chain |
-| `--amount <AMOUNT>` | USDC amount to bridge |
-| `--destination-domain <DOMAIN>` | Target domain ID |
+| `--destination-caller <ADDRESS>` | Restrict who can receive on destination |
+| `--max-fee-bps <BPS>` | Maximum fee in basis points (default: 1) |
+| `--base58` | Use base58 encoding for address |
+| `--fast` | Use fast bridging mode |
+| `-y, --yes` | Skip confirmation prompt |
 
 **Destination domains:**
 | Domain | Chain |
@@ -29,59 +38,70 @@ glam cctp bridge-usdc <VAULT_ADDRESS> [OPTIONS]
 | 2 | Optimism |
 | 3 | Arbitrum |
 | 6 | Base |
+| 7 | Polygon |
 
 **Example:**
 
 ```bash
 # Bridge 1000 USDC to Ethereum
-glam cctp bridge-usdc <VAULT> \
-  --destination 0x742d35Cc6634C0532925a3b844Bc9e7595f00000 \
-  --amount 1000 \
-  --destination-domain 0
+glam-cli cctp bridge-usdc 1000 0 0x742d35Cc6634C0532925a3b844Bc9e7595f00000
 ```
 
-### `glam cctp receive`
+### `glam-cli cctp receive`
 
 Receive bridged USDC (from another chain to Solana).
 
 ```bash
-glam cctp receive <VAULT_ADDRESS> --message <MESSAGE_HEX>
+glam-cli cctp receive <source_domain> [OPTIONS]
 ```
 
-### `glam cctp list`
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--txHash <HASH>` | Source chain transaction hash to receive |
+| `--nonce <NONCE>` | CCTP message nonce to receive |
+
+### `glam-cli cctp list`
 
 List CCTP bridge transactions.
 
 ```bash
-glam cctp list <VAULT_ADDRESS>
+glam-cli cctp list [OPTIONS]
 ```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--since-slot <SLOT>` | Only show events after this slot |
+| `--batch-size <SIZE>` | Number of signatures to fetch per batch |
+| `--commitment <LEVEL>` | Commitment level (`confirmed`, `finalized`) |
 
 ---
 
 ## CCTP Policy Commands
 
-### `glam cctp view-policy`
+### `glam-cli cctp view-policy`
 
 View CCTP policy settings for the vault.
 
 ```bash
-glam cctp view-policy <VAULT_ADDRESS>
+glam-cli cctp view-policy
 ```
 
-### `glam cctp allowlist-destination`
+### `glam-cli cctp allowlist-destination`
 
 Add a destination address/domain to the CCTP allowlist.
 
 ```bash
-glam cctp allowlist-destination <VAULT_ADDRESS> --domain <DOMAIN_ID> --address <ADDRESS>
+glam-cli cctp allowlist-destination <domain> <address> [--base58] [--yes]
 ```
 
-### `glam cctp remove-destination`
+### `glam-cli cctp remove-destination`
 
 Remove a destination from the CCTP allowlist.
 
 ```bash
-glam cctp remove-destination <VAULT_ADDRESS> --domain <DOMAIN_ID> --address <ADDRESS>
+glam-cli cctp remove-destination <domain> <address> [--base58] [--yes]
 ```
 
 ---
@@ -90,23 +110,23 @@ glam cctp remove-destination <VAULT_ADDRESS> --domain <DOMAIN_ID> --address <ADD
 
 Protect vault with timelocked configuration changes.
 
-### `glam timelock view`
+### `glam-cli timelock view`
 
 View current timelock status.
 
 ```bash
-glam timelock view <VAULT_ADDRESS>
+glam-cli timelock view
 ```
 
-### `glam timelock set`
+### `glam-cli timelock set`
 
-Set timelock delay. Change takes effect after current delay period.
+Set timelock duration. Change takes effect after current delay period.
 
 ```bash
-glam timelock set <VAULT_ADDRESS> --delay <SECONDS>
+glam-cli timelock set <duration> [--yes]
 ```
 
-**Common delays:**
+**Common durations:**
 | Seconds | Duration |
 |---------|----------|
 | 3600 | 1 hour |
@@ -118,23 +138,23 @@ glam timelock set <VAULT_ADDRESS> --delay <SECONDS>
 
 ```bash
 # Set 24-hour timelock
-glam timelock set <VAULT> --delay 86400
+glam-cli timelock set 86400
 ```
 
-### `glam timelock apply`
+### `glam-cli timelock apply`
 
 Apply pending timelock change after delay period.
 
 ```bash
-glam timelock apply <VAULT_ADDRESS>
+glam-cli timelock apply [--yes]
 ```
 
-### `glam timelock cancel`
+### `glam-cli timelock cancel`
 
 Cancel pending timelock change.
 
 ```bash
-glam timelock cancel <VAULT_ADDRESS>
+glam-cli timelock cancel [--yes]
 ```
 
 ---
@@ -143,18 +163,18 @@ glam timelock cancel <VAULT_ADDRESS>
 
 ```bash
 # 1. View current status
-glam timelock view <VAULT>
+glam-cli timelock view
 
 # 2. Set new delay (e.g., 24 hours)
-glam timelock set <VAULT> --delay 86400
+glam-cli timelock set 86400
 
 # 3. Wait for current delay period to pass...
 
 # 4. Apply the change
-glam timelock apply <VAULT>
+glam-cli timelock apply
 
 # Or cancel if needed
-glam timelock cancel <VAULT>
+glam-cli timelock cancel
 ```
 
 ---

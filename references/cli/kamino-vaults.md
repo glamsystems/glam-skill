@@ -2,31 +2,31 @@
 
 Deposit into Kamino's automated yield vaults.
 
-> **Note:** This is different from `glam kamino-lend` (lending/borrowing). Kamino Vaults are automated strategies that manage positions for you.
+> **Note:** This is different from `glam-cli kamino-lend` (lending/borrowing). Kamino Vaults are automated strategies that manage positions for you.
 
 ## Prerequisites
 
 ```bash
 # Enable the integration first
-glam integration enable <VAULT> KaminoVault
+glam-cli integration enable KaminoVaults
 ```
 
 ## Commands
 
-### `glam kamino-vaults view-policy`
+### `glam-cli kamino-vaults view-policy`
 
 View allowlisted Kamino vaults.
 
 ```bash
-glam kamino-vaults view-policy
+glam-cli kamino-vaults view-policy
 ```
 
-### `glam kamino-vaults allowlist-vault`
+### `glam-cli kamino-vaults allowlist-vault`
 
 Add a Kamino vault to the allowlist before depositing.
 
 ```bash
-glam kamino-vaults allowlist-vault <KAMINO_VAULT_ADDRESS>
+glam-cli kamino-vaults allowlist-vault <KAMINO_VAULT_ADDRESS> [--yes]
 ```
 
 **Options:**
@@ -34,40 +34,40 @@ glam kamino-vaults allowlist-vault <KAMINO_VAULT_ADDRESS>
 |------|-------------|
 | `-y, --yes` | Skip confirmation prompt |
 
-### `glam kamino-vaults remove-vault`
+### `glam-cli kamino-vaults remove-vault`
 
 Remove a Kamino vault from the allowlist.
 
 ```bash
-glam kamino-vaults remove-vault <KAMINO_VAULT_ADDRESS>
+glam-cli kamino-vaults remove-vault <KAMINO_VAULT_ADDRESS> [--yes]
 ```
 
-### `glam kamino-vaults deposit`
+### `glam-cli kamino-vaults deposit`
 
 Deposit to a Kamino vault.
 
 ```bash
-glam kamino-vaults deposit <KAMINO_VAULT_ADDRESS> <AMOUNT>
+glam-cli kamino-vaults deposit <KAMINO_VAULT_ADDRESS> <AMOUNT> [--yes]
 ```
 
 **Example:**
 ```bash
 # Deposit 1000 USDC to a Kamino vault
-glam kamino-vaults deposit KaminoVault111... 1000
+glam-cli kamino-vaults deposit KaminoVaults111... 1000
 ```
 
-### `glam kamino-vaults withdraw`
+### `glam-cli kamino-vaults withdraw`
 
 Withdraw from a Kamino vault by burning vault shares.
 
 ```bash
-glam kamino-vaults withdraw <KAMINO_VAULT_ADDRESS> <SHARES_AMOUNT>
+glam-cli kamino-vaults withdraw <KAMINO_VAULT_ADDRESS> <SHARES_AMOUNT> [--yes]
 ```
 
 **Example:**
 ```bash
 # Withdraw 500 shares worth of assets
-glam kamino-vaults withdraw KaminoVault111... 500
+glam-cli kamino-vaults withdraw KaminoVaults111... 500
 ```
 
 ---
@@ -76,16 +76,16 @@ glam kamino-vaults withdraw KaminoVault111... 500
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> KaminoVault
+glam-cli integration enable KaminoVaults
 
 # 2. Allowlist the Kamino vault you want to use
-glam kamino-vaults allowlist-vault <KAMINO_VAULT_ADDRESS>
+glam-cli kamino-vaults allowlist-vault <KAMINO_VAULT_ADDRESS>
 
 # 3. Deposit
-glam kamino-vaults deposit <KAMINO_VAULT_ADDRESS> 1000
+glam-cli kamino-vaults deposit <KAMINO_VAULT_ADDRESS> 1000
 
 # 4. When ready to exit: withdraw
-glam kamino-vaults withdraw <KAMINO_VAULT_ADDRESS> 500
+glam-cli kamino-vaults withdraw <KAMINO_VAULT_ADDRESS> 500
 ```
 
 ---

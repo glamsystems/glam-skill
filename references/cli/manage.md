@@ -4,40 +4,40 @@ Vault management operations for tokenized vaults: pricing, fulfillment, fees, an
 
 ## Commands
 
-### `glam manage price`
+### `glam-cli manage price`
 
 Price vault assets (update NAV).
 
 ```bash
-glam manage price
+glam-cli manage price
 ```
 
 Updates the vault's Net Asset Value based on current market prices.
 
-### `glam manage fulfill`
+### `glam-cli manage fulfill`
 
 Fulfill queued subscriptions and redemptions.
 
 ```bash
-glam manage fulfill
+glam-cli manage fulfill
 ```
 
 Processes pending investor subscriptions and redemptions at current NAV.
 
-### `glam manage claim-fees`
+### `glam-cli manage claim-fees`
 
 Claim accrued management fees.
 
 ```bash
-glam manage claim-fees
+glam-cli manage claim-fees
 ```
 
-### `glam manage update-min-subscription`
+### `glam-cli manage update-min-subscription`
 
 Set minimum subscription amount.
 
 ```bash
-glam manage update-min-subscription <AMOUNT>
+glam-cli manage update-min-subscription <AMOUNT> [--yes]
 ```
 
 **Options:**
@@ -48,23 +48,23 @@ glam manage update-min-subscription <AMOUNT>
 **Example:**
 ```bash
 # Set minimum subscription to 100 USDC
-glam manage update-min-subscription 100
+glam-cli manage update-min-subscription 100
 ```
 
-### `glam manage update-min-redemption`
+### `glam-cli manage update-min-redemption`
 
 Set minimum redemption amount.
 
 ```bash
-glam manage update-min-redemption <AMOUNT>
+glam-cli manage update-min-redemption <AMOUNT> [--yes]
 ```
 
-### `glam manage pause`
+### `glam-cli manage pause`
 
 Pause subscription or redemption.
 
 ```bash
-glam manage pause <ACTION>
+glam-cli manage pause <ACTION> [--yes]
 ```
 
 **Arguments:**
@@ -75,24 +75,24 @@ glam manage pause <ACTION>
 **Example:**
 ```bash
 # Pause new subscriptions
-glam manage pause subscription
+glam-cli manage pause subscription
 
 # Pause redemptions
-glam manage pause redemption
+glam-cli manage pause redemption
 ```
 
-### `glam manage unpause`
+### `glam-cli manage unpause`
 
 Resume subscription or redemption.
 
 ```bash
-glam manage unpause <ACTION>
+glam-cli manage unpause <ACTION> [--yes]
 ```
 
 **Example:**
 ```bash
 # Resume subscriptions
-glam manage unpause subscription
+glam-cli manage unpause subscription
 ```
 
 ---
@@ -103,13 +103,13 @@ glam manage unpause subscription
 # Daily/periodic operations for tokenized vault managers:
 
 # 1. Price vault (update NAV)
-glam manage price
+glam-cli manage price
 
 # 2. Process pending subscriptions/redemptions
-glam manage fulfill
+glam-cli manage fulfill
 
 # 3. Claim fees (when desired)
-glam manage claim-fees
+glam-cli manage claim-fees
 ```
 
 ---
@@ -118,10 +118,10 @@ glam manage claim-fees
 
 ```bash
 # Pause all new subscriptions (e.g., during market volatility)
-glam manage pause subscription
+glam-cli manage pause subscription
 
 # Resume when ready
-glam manage unpause subscription
+glam-cli manage unpause subscription
 ```
 
 ---

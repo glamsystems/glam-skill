@@ -15,59 +15,61 @@ Practical usage patterns for CLI and SDK operations.
 ### Create and Configure a Vault (CLI)
 
 ```bash
-# 1. Create vault
-glam vault create --name "My Treasury"
-# Output: Vault created: <VAULT_ADDRESS>
+# 1. Create vault from template
+glam-cli vault create ./vault-template.json
+# Output: Vault created: <VAULT_STATE_PUBKEY>
 
-# 2. View vault details
-glam vault view <VAULT_ADDRESS>
+# 2. Set active vault
+glam-cli vault set <VAULT_STATE_PUBKEY>
 
-# 3. Add assets to allowlist
-glam vault allowlist-asset <VAULT_ADDRESS> EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
-glam vault allowlist-asset <VAULT_ADDRESS> Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB
+# 3. View vault details
+glam-cli vault view
 
-# 4. Enable Jupiter for swaps
-glam integration enable <VAULT_ADDRESS> JupiterSwap
+# 4. Add assets to allowlist
+glam-cli vault allowlist-asset EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --yes
+glam-cli vault allowlist-asset Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB --yes
 
-# 5. Check balances
-glam vault balances <VAULT_ADDRESS>
+# 5. Enable Jupiter for swaps
+glam-cli integration enable JupiterSwap
+
+# 6. Check balances
+glam-cli vault balances
 ```
 
 ### Create Vault (SDK)
 
 ```typescript
-import { GlamClient } from "@glamsystems/glam-sdk";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { GlamClient, COMMON_MINTS, getProgramAndBitflagByProtocolName } from "@glamsystems/glam-sdk";
 
-const keypair = Keypair.fromSecretKey(/* your key */);
-const client = new GlamClient({ keypair });
+const client = new GlamClient({ wallet });
 
 // Create vault
 const { vaultPda, txId } = await client.vault.create({
   name: "My Treasury",
-  assets: [
-    new PublicKey("So11111111111111111111111111111111111111112"),  // SOL
-    new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), // USDC
-  ],
+  assets: [COMMON_MINTS.SOL, COMMON_MINTS.USDC],
 });
 
 console.log("Vault created:", vaultPda.toBase58());
 console.log("Transaction:", txId);
 
 // Enable integrations
-await client.vault.enableIntegration(vaultPda, "JupiterSwap");
-await client.vault.enableIntegration(vaultPda, "KaminoLend");
+const perms = getProgramAndBitflagByProtocolName();
+const [jupProgram, jupBitflag] = perms["JupiterSwap"];
+await client.access.enableProtocols(vaultPda, jupProgram, parseInt(jupBitflag, 2));
+
+const [kaminoProgram, kaminoBitflag] = perms["KaminoLend"];
+await client.access.enableProtocols(vaultPda, kaminoProgram, parseInt(kaminoBitflag, 2));
 ```
 
 ### Simple Token Swap (CLI)
 
 ```bash
 # Swap 100 USDC to SOL
-glam jupiter swap <VAULT_ADDRESS> \
-  --input-mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --output-mint So11111111111111111111111111111111111111112 \
-  --amount 100 \
-  --slippage 50
+glam-cli jupiter swap \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  So11111111111111111111111111111111111111112 \
+  100 \
+  --slippage-bps 50 --yes
 ```
 
 ### Simple Token Swap (SDK)
@@ -77,8 +79,8 @@ import { BN } from "@coral-xyz/anchor";
 
 // Get quote first
 const quote = await client.jupiterSwap.getQuote({
-  inputMint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
-  outputMint: new PublicKey("So11111111111111111111111111111111111111112"),
+  inputMint: COMMON_MINTS.USDC,
+  outputMint: COMMON_MINTS.SOL,
   amount: new BN(100_000_000), // 100 USDC (6 decimals)
   slippageBps: 50,
 });
@@ -87,8 +89,8 @@ console.log("Expected output:", quote.outAmount.toString());
 
 // Execute swap
 const txId = await client.jupiterSwap.swap(vaultPda, {
-  inputMint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
-  outputMint: new PublicKey("So11111111111111111111111111111111111111112"),
+  inputMint: COMMON_MINTS.USDC,
+  outputMint: COMMON_MINTS.SOL,
   amount: new BN(100_000_000),
   slippageBps: 50,
 });
@@ -101,32 +103,33 @@ const txId = await client.jupiterSwap.swap(vaultPda, {
 ### Set Up Delegate Permissions (CLI)
 
 ```bash
-# Grant trading permissions to a delegate
-glam delegate grant <VAULT_ADDRESS> <DELEGATE_PUBKEY> \
-  --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftCancelOrders
+# Grant Jupiter swap permission to a delegate
+glam-cli delegate grant <DELEGATE_PUBKEY> SwapAny --protocol JupiterSwap --yes
 
 # Verify delegate was added
-glam delegate list <VAULT_ADDRESS>
+glam-cli delegate list
+
+# Grant Drift trading permissions to same or another delegate
+glam-cli delegate grant <DELEGATE_PUBKEY> Deposit Withdraw CreateModifyOrders CancelOrders --protocol DriftProtocol --yes
 
 # Grant Kamino permissions to another delegate
-glam delegate grant <VAULT_ADDRESS> <OTHER_DELEGATE> \
-  --permissions KaminoDeposit,KaminoWithdraw,KaminoBorrow,KaminoRepay
+glam-cli delegate grant <OTHER_DELEGATE> Deposit Withdraw Borrow Repay --protocol KaminoLend --yes
 ```
 
 ### Set Up Delegate Permissions (SDK)
 
 ```typescript
-// Grant full trading permissions
-await client.access.grantDelegate(vaultPda, {
+// Grant trading permissions (protocol-scoped)
+await client.access.grantDelegatePermissions(vaultPda, {
   delegate: new PublicKey("<DELEGATE_PUBKEY>"),
   permissions: [
-    "Swap",
+    "SwapAny",
     "DriftDeposit",
     "DriftWithdraw",
-    "DriftPlaceOrders",
+    "DriftCreateModifyOrders",
     "DriftCancelOrders",
-    "DriftPerpMarket",
-    "DriftSpotMarket",
+    "DriftPerpMarkets",
+    "DriftSpotMarkets",
   ],
 });
 
@@ -142,35 +145,36 @@ for (const delegate of delegates) {
 
 ```bash
 # 1. Enable Kamino integration
-glam integration enable <VAULT_ADDRESS> KaminoLend
+glam-cli integration enable KaminoLend
 
 # 2. Initialize Kamino for vault
-glam kamino-lend init <VAULT_ADDRESS>
+glam-cli kamino-lend init --yes
 
 # 3. Deposit USDC to main market
-glam kamino-lend deposit <VAULT_ADDRESS> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --amount 1000
+glam-cli kamino-lend deposit \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  1000 --yes
 
 # 4. View positions
-glam kamino-lend list <VAULT_ADDRESS>
+glam-cli kamino-lend list
 ```
 
 ### Deposit to Kamino Lending (SDK)
 
 ```typescript
 // Enable and initialize
-await client.vault.enableIntegration(vaultPda, "KaminoLend");
-await client.kaminoLending.init(vaultPda);
+const perms = getProgramAndBitflagByProtocolName();
+const [kaminoProgram, kaminoBitflag] = perms["KaminoLend"];
+await client.access.enableProtocols(vaultPda, kaminoProgram, parseInt(kaminoBitflag, 2));
+await client.kaminoLending.initUserMetadata(vaultPda);
 
 // Deposit
 const KAMINO_MAIN_MARKET = new PublicKey("7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF");
-const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 
 await client.kaminoLending.deposit(vaultPda, {
   market: KAMINO_MAIN_MARKET,
-  mint: USDC_MINT,
+  mint: COMMON_MINTS.USDC,
   amount: new BN(1000_000_000), // 1000 USDC
 });
 
@@ -183,19 +187,19 @@ console.log("Lending positions:", positions);
 
 ```bash
 # 1. Enable Drift integration
-glam integration enable <VAULT_ADDRESS> DriftProtocol
+glam-cli integration enable DriftProtocol
 
 # 2. Initialize Drift user
-glam drift-protocol init-user <VAULT_ADDRESS>
+glam-cli drift-protocol init-user --yes
 
 # 3. Deposit USDC as collateral
-glam drift-protocol deposit <VAULT_ADDRESS> --market-index 0 --amount 1000
+glam-cli drift-protocol deposit 0 1000 --yes
 
 # 4. Open 1 SOL-PERP long
-glam drift-protocol perp <VAULT_ADDRESS> --market-index 0 --amount 1 --direction long
+glam-cli drift-protocol perp long 0 1 0 --yes
 
 # 5. View positions
-glam drift-protocol list-positions <VAULT_ADDRESS>
+glam-cli drift-protocol list-positions
 ```
 
 ---
@@ -205,40 +209,38 @@ glam drift-protocol list-positions <VAULT_ADDRESS>
 ### Create Tokenized Vault with Full Configuration (CLI)
 
 ```bash
-# 1. Create tokenized vault with share class
-glam vault create \
-  --name "GLAM Alpha Fund" \
-  --share-class-name "Alpha Shares" \
-  --share-class-symbol "ALPHA" \
-  --share-class-decimals 6 \
-  --assets So11111111111111111111111111111111111111112,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+# 1. Create tokenized vault from JSON template (includes share class config)
+glam-cli vault create ./tokenized-vault-template.json
 
-# 2. Enable all required integrations
-glam integration enable <VAULT_ADDRESS> JupiterSwap DriftProtocol KaminoLend
+# 2. Set active vault
+glam-cli vault set <VAULT_STATE_PUBKEY>
 
-# 3. Set initial share price (1.0 USDC)
-glam manage price <VAULT_ADDRESS> --share-class 0 --price 1.0
+# 3. Enable all required integrations
+glam-cli integration enable JupiterSwap DriftProtocol KaminoLend
 
-# 4. Set up a trading delegate
-glam delegate grant <VAULT_ADDRESS> <TRADER_PUBKEY> \
-  --permissions Swap,DriftDeposit,DriftWithdraw,DriftPlaceOrders,DriftPerpMarket
+# 4. Set initial share price (update NAV)
+glam-cli manage price
 
-# 5. Configure swap policy
-glam jupiter set-max-slippage <VAULT_ADDRESS> --max-slippage 100
-glam jupiter allowlist-token <VAULT_ADDRESS> So11111111111111111111111111111111111111112
-glam jupiter allowlist-token <VAULT_ADDRESS> EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+# 5. Set up a trading delegate (protocol-scoped)
+glam-cli delegate grant <TRADER_PUBKEY> SwapAny --protocol JupiterSwap --yes
+glam-cli delegate grant <TRADER_PUBKEY> Deposit Withdraw CreateModifyOrders PerpMarkets --protocol DriftProtocol --yes
 
-# 6. Set timelock for security
-glam timelock set <VAULT_ADDRESS> --delay 86400
+# 6. Configure swap policy
+glam-cli jupiter set-max-slippage 100 --yes
+glam-cli jupiter allowlist-token So11111111111111111111111111111111111111112 --yes
+glam-cli jupiter allowlist-token EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v --yes
+
+# 7. Set timelock for security (24 hours)
+glam-cli timelock set 86400 --yes
 ```
 
 ### Create Tokenized Vault (SDK)
 
 ```typescript
-import { GlamClient, COMMON_MINTS } from "@glamsystems/glam-sdk";
+import { GlamClient, COMMON_MINTS, getProgramAndBitflagByProtocolName } from "@glamsystems/glam-sdk";
 import { BN } from "@coral-xyz/anchor";
 
-const client = new GlamClient({ keypair });
+const client = new GlamClient({ wallet });
 
 // Create vault with share class
 const { vaultPda } = await client.vault.create({
@@ -250,11 +252,11 @@ const { vaultPda } = await client.vault.create({
 });
 
 // Enable integrations
-await Promise.all([
-  client.vault.enableIntegration(vaultPda, "JupiterSwap"),
-  client.vault.enableIntegration(vaultPda, "DriftProtocol"),
-  client.vault.enableIntegration(vaultPda, "KaminoLend"),
-]);
+const perms = getProgramAndBitflagByProtocolName();
+for (const name of ["JupiterSwap", "DriftProtocol", "KaminoLend"]) {
+  const [program, bitflag] = perms[name];
+  await client.access.enableProtocols(vaultPda, program, parseInt(bitflag, 2));
+}
 
 // Set initial price
 await client.fees.setPrice(vaultPda, {
@@ -263,14 +265,14 @@ await client.fees.setPrice(vaultPda, {
 });
 
 // Configure trading delegate
-await client.access.grantDelegate(vaultPda, {
+await client.access.grantDelegatePermissions(vaultPda, {
   delegate: traderPubkey,
   permissions: [
-    "Swap",
+    "SwapAny",
     "DriftDeposit",
     "DriftWithdraw",
-    "DriftPlaceOrders",
-    "DriftPerpMarket",
+    "DriftCreateModifyOrders",
+    "DriftPerpMarkets",
   ],
 });
 
@@ -286,28 +288,28 @@ await client.jupiterSwap.allowlistToken(vaultPda, COMMON_MINTS.USDC);
 # Starting with 10,000 USDC in vault
 
 # 1. Swap 50% to SOL for diversification
-glam jupiter swap <VAULT> \
-  --input-mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --output-mint So11111111111111111111111111111111111111112 \
-  --amount 5000 \
-  --slippage 50
+glam-cli jupiter swap \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  So11111111111111111111111111111111111111112 \
+  5000 \
+  --slippage-bps 50 --yes
 
 # 2. Deposit remaining USDC to Kamino for yield
-glam kamino-lend deposit <VAULT> \
-  --market 7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
-  --mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
-  --amount 5000
+glam-cli kamino-lend deposit \
+  7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF \
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
+  5000 --yes
 
 # 3. Deposit SOL as collateral on Drift
-glam drift-protocol deposit <VAULT> --market-index 1 --amount 50
+glam-cli drift-protocol deposit 1 50 --yes
 
 # 4. Open delta-neutral position
-glam drift-protocol perp <VAULT> --market-index 0 --amount 25 --direction short
+glam-cli drift-protocol perp short 0 25 0 --yes
 
 # 5. Check all positions
-glam vault holdings <VAULT>
-glam kamino-lend list <VAULT>
-glam drift-protocol list-positions <VAULT>
+glam-cli vault holdings
+glam-cli kamino-lend list
+glam-cli drift-protocol list-positions
 ```
 
 ### Investor Subscription Flow (CLI)
@@ -316,19 +318,19 @@ glam drift-protocol list-positions <VAULT>
 # As investor (not vault manager):
 
 # 1. Subscribe with 1000 USDC
-glam invest subscribe <VAULT_ADDRESS> --share-class 0 --amount 1000
+glam-cli invest subscribe 1000 --yes
 
 # 2. Wait for manager to fulfill subscription
-# (Manager runs: glam manage fulfill <VAULT> --share-class 0)
+# (Manager runs: glam-cli manage fulfill)
 
 # 3. Claim shares
-glam invest claim-subscription <VAULT_ADDRESS> --share-class 0
+glam-cli invest claim-subscription
 
 # 4. Later, redeem 100 shares
-glam invest redeem <VAULT_ADDRESS> --share-class 0 --shares 100
+glam-cli invest redeem 100 --yes
 
 # 5. Wait for fulfillment, then claim
-glam invest claim-redemption <VAULT_ADDRESS> --share-class 0
+glam-cli invest claim-redemption
 ```
 
 ### Cross-Chain USDC Bridge (CLI)
@@ -336,17 +338,14 @@ glam invest claim-redemption <VAULT_ADDRESS> --share-class 0
 ```bash
 # Bridge USDC from Solana to Ethereum
 
-# 1. Bridge 1000 USDC to Ethereum address
-glam cctp bridge-usdc <VAULT_ADDRESS> \
-  --destination 0x742d35Cc6634C0532925a3b844Bc9e7595f00000 \
-  --amount 1000 \
-  --destination-domain 0
+# 1. Bridge 1000 USDC to Ethereum address (domain 0 = Ethereum)
+glam-cli cctp bridge-usdc 1000 0 0x742d35Cc6634C0532925a3b844Bc9e7595f00000 --yes
 
 # 2. List pending transfers
-glam cctp list <VAULT_ADDRESS>
+glam-cli cctp list
 
 # To receive USDC from another chain:
-glam cctp receive <VAULT_ADDRESS> --message <ATTESTATION_MESSAGE_HEX>
+glam-cli cctp receive <SOURCE_DOMAIN> --txHash <TX_HASH>
 ```
 
 ### Full Vault Management Script (SDK)
@@ -354,10 +353,11 @@ glam cctp receive <VAULT_ADDRESS> --message <ATTESTATION_MESSAGE_HEX>
 ```typescript
 import { GlamClient, COMMON_MINTS } from "@glamsystems/glam-sdk";
 import { BN } from "@coral-xyz/anchor";
+import { PublicKey } from "@solana/web3.js";
 
 async function manageVault() {
-  const client = new GlamClient({ keypair });
-  const vaultPda = new PublicKey("<VAULT_ADDRESS>");
+  const client = new GlamClient({ wallet });
+  const vaultPda = new PublicKey("<VAULT_STATE_PUBKEY>");
 
   // Get current state
   const state = await client.vault.fetch(vaultPda);

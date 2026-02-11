@@ -4,25 +4,16 @@
 
 Access via `client.access`.
 
-### grantDelegate
+### grantDelegatePermissions
 
 ```typescript
-await client.access.grantDelegate(vaultPda: PublicKey, {
+await client.access.grantDelegatePermissions(vaultPda: PublicKey, {
   delegate: PublicKey;
   permissions: Permission[];
 }, options?: TxOptions);
 ```
 
-**Permission type:**
-```typescript
-type Permission =
-  | "Swap" | "Stake" | "Unstake" | "LiquidUnstake"
-  | "DriftInit" | "DriftDeposit" | "DriftWithdraw" | "DriftUpdateUser"
-  | "DriftDeleteUser" | "DriftPlaceOrders" | "DriftCancelOrders"
-  | "DriftPerpMarket" | "DriftSpotMarket"
-  | "KaminoInit" | "KaminoDeposit" | "KaminoWithdraw" | "KaminoBorrow" | "KaminoRepay"
-  | "MeteoraInit" | "MeteoraDeposit" | "MeteoraWithdraw";
-```
+**Permission names** are protocol-scoped. Use them with `glam-cli delegate grant --protocol <PROTOCOL>`. The exact string must match the source (case-sensitive). See [concepts.md](../concepts.md) for the full permission bitmask table.
 
 ### revokeDelegate
 
@@ -41,8 +32,9 @@ const delegates = await client.access.listDelegates(vaultPda: PublicKey);
 
 ```typescript
 await client.access.emergencyAccessUpdate(vaultPda: PublicKey, {
-  newManager?: PublicKey;
-  clearDelegates?: boolean;
+  disabledIntegrations?: number;
+  disabledDelegates?: PublicKey[];
+  stateEnabled?: boolean;
 }, options?: TxOptions);
 ```
 
@@ -62,6 +54,51 @@ await client.access.disableProtocols(vaultPda: PublicKey, integrationProgram: Pu
 
 ```typescript
 await client.access.setProtocolPolicy(vaultPda: PublicKey, integrationProgram: PublicKey, protocolBitflag: number, data: Buffer, options?: TxOptions);
+```
+
+### getProgramAndBitflagByProtocolName
+
+Map protocol names to their program address and bitflag for use with `enableProtocols`/`disableProtocols`.
+
+```typescript
+import { getProgramAndBitflagByProtocolName } from "@glamsystems/glam-sdk";
+
+const permissionsMap = getProgramAndBitflagByProtocolName();
+const [program, bitflag] = permissionsMap["JupiterSwap"];
+
+// Enable Jupiter swap
+await client.access.enableProtocols(vaultPda, program, parseInt(bitflag, 2));
+```
+
+---
+
+## Policy Encoding
+
+### TransferPolicy
+
+Encode transfer destination allowlists.
+
+```typescript
+import { TransferPolicy } from "@glamsystems/glam-sdk";
+
+const policy = new TransferPolicy([]);
+policy.allowlist.push(new PublicKey("Destination111..."));
+policy.allowlist.push(new PublicKey("Destination222..."));
+
+await client.access.setProtocolPolicy(vaultPda, splProgram, transferBitflag, policy.encode());
+```
+
+### SwapPolicy
+
+Encode swap token allowlists.
+
+```typescript
+import { SwapPolicy } from "@glamsystems/glam-sdk";
+
+const policy = new SwapPolicy([]);
+policy.allowlist.push(new PublicKey("TokenMint111..."));
+
+await client.access.setProtocolPolicy(vaultPda, jupiterProgram, swapAllowlistedBitflag, policy.encode());
 ```
 
 ---
@@ -112,10 +149,10 @@ await client.jupiterSwap.allowlistToken(vaultPda: PublicKey, mint: PublicKey, op
 
 Access via `client.drift`.
 
-### initUser
+### initialize
 
 ```typescript
-await client.drift.initUser(vaultPda: PublicKey, options?: TxOptions);
+await client.drift.initialize(vaultPda: PublicKey, options?: TxOptions);
 ```
 
 ### deposit / withdraw
@@ -218,10 +255,10 @@ const users = await client.drift.fetchAndParseDriftUsers(vaultPda: PublicKey);
 
 Access via `client.kaminoLending`.
 
-### init
+### initUserMetadata
 
 ```typescript
-await client.kaminoLending.init(vaultPda: PublicKey, options?: TxOptions);
+await client.kaminoLending.initUserMetadata(vaultPda: PublicKey, options?: TxOptions);
 ```
 
 ### deposit
@@ -454,24 +491,24 @@ await client.kaminoFarm.harvest(farmStates: PublicKey[], options?: TxOptions);
 
 ## Marinade Staking
 
-Access via `client.marinade`.
+Access via `client.marinade`. Protocol name: `Marinade` (staging).
 
-### stake
+### deposit (stake SOL for mSOL)
 
 ```typescript
-await client.marinade.stake(amount: BN, options?: TxOptions);
+await client.marinade.deposit(amount: BN, options?: TxOptions);
 ```
 
-### unstake
+### depositNative (stake SOL to Marinade Native)
 
 ```typescript
-await client.marinade.unstake(amount: BN, options?: TxOptions);
+await client.marinade.depositNative(amount: BN, options?: TxOptions);
 ```
 
-### liquidUnstake
+### withdrawStakeAccount (withdraw mSOL into stake account)
 
 ```typescript
-await client.marinade.liquidUnstake(amount: BN, options?: TxOptions);
+await client.marinade.withdrawStakeAccount(amount: BN, deactivate: boolean, options?: TxOptions);
 ```
 
 ---
@@ -580,16 +617,14 @@ const holders = await client.mint.fetchTokenHolders(mintPda: PublicKey);
 ```typescript
 interface StateModel {
   pubkey: PublicKey;
-  name: string;
+  name: number[];
   uri: string;
-  manager: PublicKey;
   owner: PublicKey;
-  created: Date;
+  created: CreatedModel;
   integrations: Integration[];
   assets: PublicKey[];
   shareClasses: MintModel[];
-  paused: boolean;
-  timelockDelay: number;
+  timelockDuration: number;
 }
 ```
 
@@ -598,8 +633,9 @@ interface StateModel {
 ```typescript
 interface MintModel {
   pubkey: PublicKey;
-  name: string;
+  name: number[];
   symbol: string;
+  uri: string;
   decimals: number;
   supply: BN;
   price: BN;

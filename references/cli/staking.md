@@ -1,126 +1,124 @@
 # CLI: Staking Commands
 
-> **⚠️ WARNING: Development Only**
+> **Warning: Unaudited Integrations**
 >
-> The `glam marinade`, `glam stake`, and `glam lst` commands are **unaudited** and require `NODE_ENV=development` flag to use. Do not use these in production without thorough testing and security review.
+> The `glam-cli marinade`, `glam-cli stake`, and `glam-cli lst` commands use **unaudited** integrations and require BOTH:
+> 1. `NODE_ENV=development` environment variable
+> 2. `--bypass-warning` (or `-b`) flag on the parent command
+>
+> Without both, the command will print `"Unaudited integration. Use with caution."` and exit.
 >
 > ```bash
-> # Enable development mode to use these commands
-> NODE_ENV=development glam marinade stake <VAULT> --amount 100
+> NODE_ENV=development glam-cli marinade --bypass-warning stake 100
 > ```
 
 SOL staking operations via multiple protocols.
 
 ## Available Staking Integrations
 
-| Integration | Description | LST Received |
-|-------------|-------------|--------------|
-| `MarinadeStaking` | Marinade liquid staking | mSOL |
-| `NativeStaking` | Native Solana staking | None (stake account) |
-| `SplStakePool` | SPL stake pools | Pool token |
-| `SanctumStaking` | Sanctum unified staking | Various LSTs |
+| Integration | Protocol Name | Description | Staging |
+|-------------|--------------|-------------|---------|
+| Marinade | `Marinade` | Marinade liquid staking (mSOL) | Yes |
+| Native Staking | `StakeProgram` | Native Solana staking (stake accounts) | Yes |
+| SPL Stake Pools | `StakePool` | SPL stake pools (via `lst` command) | Yes |
+| Sanctum Single | `SanctumSingle` | Sanctum single-validator pools (via `lst` command) | Yes |
+| Sanctum Multi | `SanctumMulti` | Sanctum multi-validator pools (via `lst` command) | Yes |
 
 ## Marinade Staking
 
-**Prerequisite:** Enable `MarinadeStaking` integration.
+**Prerequisite:** Enable `Marinade` integration.
 
 ```bash
-glam integration enable <VAULT_ADDRESS> MarinadeStaking
+glam-cli integration enable Marinade
 ```
 
 ### Stake SOL to get mSOL
 
 ```bash
-glam marinade stake <VAULT_ADDRESS> --amount <SOL_AMOUNT>
+NODE_ENV=development glam-cli marinade --bypass-warning stake <amount> [--yes]
 ```
 
-### Unstake mSOL
+### Stake SOL to Marinade Native
 
 ```bash
-# Liquid unstake (instant, small fee)
-glam marinade unstake <VAULT_ADDRESS> --amount <MSOL_AMOUNT>
-
-# Delayed unstake (no fee, ~2 days)
-glam marinade delayed-unstake <VAULT_ADDRESS> --amount <MSOL_AMOUNT>
+NODE_ENV=development glam-cli marinade --bypass-warning stake-native <amount> [--yes]
 ```
 
-### Claim delayed unstake
+### Withdraw mSOL into a stake account
 
 ```bash
-glam marinade claim <VAULT_ADDRESS> --ticket <TICKET_ADDRESS>
+NODE_ENV=development glam-cli marinade --bypass-warning withdraw-stake <amount> [--deactivate] [--yes]
 ```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `-d, --deactivate` | Deactivate the stake account |
+| `-y, --yes` | Skip confirmation prompt |
 
 ---
 
 ## Native Staking
 
-**Prerequisite:** Enable `NativeStaking` integration.
+**Prerequisite:** Enable `StakeProgram` integration.
 
 ```bash
-glam integration enable <VAULT_ADDRESS> NativeStaking
+glam-cli integration enable StakeProgram
 ```
 
-### Stake to validator
+### List stake accounts
 
 ```bash
-glam stake stake <VAULT_ADDRESS> --validator <VOTE_ACCOUNT> --amount <SOL_AMOUNT>
+NODE_ENV=development glam-cli stake --bypass-warning list
 ```
 
-### Deactivate stake
+### Deactivate stake accounts
 
 ```bash
-glam stake deactivate <VAULT_ADDRESS> --stake-account <STAKE_ACCOUNT>
+NODE_ENV=development glam-cli stake --bypass-warning deactivate <accounts...> [--yes]
 ```
 
-### Withdraw stake (after deactivation completes)
+Takes one or more stake account pubkeys (space-separated).
+
+### Withdraw from stake accounts
 
 ```bash
-glam stake withdraw <VAULT_ADDRESS> --stake-account <STAKE_ACCOUNT>
+NODE_ENV=development glam-cli stake --bypass-warning withdraw <accounts...> [--yes]
 ```
+
+Takes one or more stake account pubkeys (space-separated). Stake accounts must be fully deactivated before withdrawal.
 
 ---
 
-## SPL Stake Pools
+## SPL Stake Pools & Sanctum
 
-**Prerequisite:** Enable `SplStakePool` integration.
+SPL stake pool and Sanctum operations use the `glam-cli lst` command. There are no separate `stake-pool` or `sanctum` command groups.
 
-```bash
-glam integration enable <VAULT_ADDRESS> SplStakePool
-```
-
-### Deposit to stake pool
+**Prerequisites:**
 
 ```bash
-glam stake-pool deposit <VAULT_ADDRESS> --pool <POOL_ADDRESS> --amount <SOL_AMOUNT>
+# For SPL stake pools
+glam-cli integration enable StakePool
+
+# For Sanctum pools
+glam-cli integration enable SanctumSingle
+# or
+glam-cli integration enable SanctumMulti
 ```
 
-### Withdraw from stake pool
+### Stake SOL into a pool
 
 ```bash
-glam stake-pool withdraw <VAULT_ADDRESS> --pool <POOL_ADDRESS> --amount <TOKEN_AMOUNT>
+NODE_ENV=development glam-cli lst --bypass-warning stake <stakepool> <amount> [--yes]
 ```
 
----
-
-## Sanctum Staking
-
-**Prerequisite:** Enable `SanctumStaking` integration.
+### Unstake from a pool
 
 ```bash
-glam integration enable <VAULT_ADDRESS> SanctumStaking
+NODE_ENV=development glam-cli lst --bypass-warning unstake <asset> <amount> [--deactivate] [--yes]
 ```
 
-### Stake via Sanctum
-
-```bash
-glam sanctum stake <VAULT_ADDRESS> --lst <LST_MINT> --amount <SOL_AMOUNT>
-```
-
-### Unstake via Sanctum
-
-```bash
-glam sanctum unstake <VAULT_ADDRESS> --lst <LST_MINT> --amount <LST_AMOUNT>
-```
+See [lst.md](./lst.md) for full details.
 
 ---
 
@@ -139,17 +137,14 @@ glam sanctum unstake <VAULT_ADDRESS> --lst <LST_MINT> --amount <LST_AMOUNT>
 
 ```bash
 # 1. Enable integration
-glam integration enable <VAULT> MarinadeStaking
+glam-cli integration enable Marinade
 
 # 2. Stake SOL
-glam marinade stake <VAULT> --amount 100
+NODE_ENV=development glam-cli marinade --bypass-warning stake 100
 
-# 3. Later, unstake with instant liquidity
-glam marinade unstake <VAULT> --amount 50
+# 3. Later, withdraw mSOL into a stake account
+NODE_ENV=development glam-cli marinade --bypass-warning withdraw-stake 50
 
-# Or use delayed unstake for no fee
-glam marinade delayed-unstake <VAULT> --amount 50
-
-# 4. After ~2 days, claim delayed unstake
-glam marinade claim <VAULT> --ticket <TICKET>
+# 4. Or withdraw and deactivate in one step
+NODE_ENV=development glam-cli marinade --bypass-warning withdraw-stake 50 --deactivate
 ```
