@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "glam-skill",
-      "description": "Skills for building and managing tokenized investment vaults on Solana using GLAM. Covers vault creation, policy configuration, DeFi integrations (Drift, Jupiter, Kamino), staking, and SDK usage.",
+      "description": "Skills for building and managing tokenized vaults on Solana using GLAM. Covers vault creation, policy configuration, DeFi integrations (Drift, Jupiter, Kamino), staking, and SDK usage.",
       "source": "./",
       "category": "development",
       "tags": ["solana", "defi", "asset-management"],
