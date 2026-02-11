@@ -21,21 +21,26 @@ glam-cli jupiter swap <from> <to> <amount> [OPTIONS] [--yes]
 **Arguments:**
 | Argument | Description |
 |----------|-------------|
-| `from` | Input token mint |
-| `to` | Output token mint |
-| `amount` | Amount in token units |
+| `from` | Input token mint address or symbol (e.g., `USDC`, `SOL`) |
+| `to` | Output token mint address or symbol |
+| `amount` | Amount in token units (decimal-adjusted) |
 
 **Options:**
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--slippage-bps <BPS>` | Slippage tolerance in basis points | 50 |
-| `--only-direct-routes` | Use only direct routes | false |
+| `-s, --slippage-bps <BPS>` | Slippage tolerance in basis points | 5 (0.05%) |
+| `-m, --max-accounts <NUM>` | Max accounts allowed in swap route | - |
+| `--use-v2` | Use v2 swap instruction | false |
+| `-d, --only-direct-routes` | Use only direct routes | false |
 | `-y, --yes` | Skip confirmation prompt | - |
 
 **Examples:**
 
 ```bash
-# Swap 100 USDC to SOL with 0.5% slippage
+# Swap 100 USDC to SOL using symbols
+glam-cli jupiter swap USDC SOL 100 --slippage-bps 50
+
+# Swap using mint addresses with 0.5% slippage
 glam-cli jupiter swap \
   EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v \
   So11111111111111111111111111111111111111112 \
@@ -43,10 +48,10 @@ glam-cli jupiter swap \
   --slippage-bps 50
 
 # Swap with 1% slippage
-glam-cli jupiter swap <INPUT> <OUTPUT> 1000 --slippage-bps 100
+glam-cli jupiter swap USDC SOL 1000 --slippage-bps 100
 
 # Use direct routes only (less hops, potentially worse price)
-glam-cli jupiter swap <INPUT> <OUTPUT> 1000 --only-direct-routes
+glam-cli jupiter swap USDC SOL 1000 --only-direct-routes
 ```
 
 ### `glam-cli jupiter view-policy`
@@ -102,6 +107,7 @@ glam-cli jupiter clear-allowlist [--yes]
 
 | BPS | Percentage |
 |-----|------------|
+| 5 | 0.05% (default) |
 | 10 | 0.1% |
 | 50 | 0.5% |
 | 100 | 1.0% |

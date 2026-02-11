@@ -2,14 +2,6 @@
 
 Practical usage patterns for CLI and SDK operations.
 
-## Table of Contents
-
-- [Basic Examples](#basic-examples)
-- [Intermediate Examples](#intermediate-examples)
-- [Advanced Examples](#advanced-examples)
-
----
-
 ## Basic Examples
 
 ### Create and Configure a Vault (CLI)
@@ -33,32 +25,48 @@ glam-cli vault allowlist-asset Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB --ye
 glam-cli integration enable JupiterSwap
 
 # 6. Check balances
-glam-cli vault balances
+glam-cli vault token-balances
 ```
 
 ### Create Vault (SDK)
 
 ```typescript
-import { GlamClient, COMMON_MINTS, getProgramAndBitflagByProtocolName } from "@glamsystems/glam-sdk";
+import {
+  GlamClient,
+  WSOL,
+  USDC,
+  StateAccountType,
+  getProgramAndBitflagByProtocolName,
+  stringToChars,
+} from "@glamsystems/glam-sdk";
+import { PublicKey } from "@solana/web3.js";
 
 const client = new GlamClient({ wallet });
 
-// Create vault
-const { vaultPda, txId } = await client.vault.create({
-  name: "My Treasury",
-  assets: [COMMON_MINTS.SOL, COMMON_MINTS.USDC],
+// Create vault via state.initialize
+const txId = await client.state.initialize({
+  accountType: StateAccountType.VAULT,
+  name: stringToChars("My Treasury"),
+  baseAssetMint: USDC,
+  assets: [WSOL, USDC],
 });
 
-console.log("Vault created:", vaultPda.toBase58());
+console.log("Vault created:", client.statePda.toBase58());
 console.log("Transaction:", txId);
 
 // Enable integrations
 const perms = getProgramAndBitflagByProtocolName();
 const [jupProgram, jupBitflag] = perms["JupiterSwap"];
-await client.access.enableProtocols(vaultPda, jupProgram, parseInt(jupBitflag, 2));
+await client.access.enableProtocols(
+  new PublicKey(jupProgram),
+  parseInt(jupBitflag, 2),
+);
 
 const [kaminoProgram, kaminoBitflag] = perms["KaminoLend"];
-await client.access.enableProtocols(vaultPda, kaminoProgram, parseInt(kaminoBitflag, 2));
+await client.access.enableProtocols(
+  new PublicKey(kaminoProgram),
+  parseInt(kaminoBitflag, 2),
+);
 ```
 
 ### Simple Token Swap (CLI)
@@ -77,22 +85,27 @@ glam-cli jupiter swap \
 ```typescript
 import { BN } from "@coral-xyz/anchor";
 
-// Get quote first
-const quote = await client.jupiterSwap.getQuote({
-  inputMint: COMMON_MINTS.USDC,
-  outputMint: COMMON_MINTS.SOL,
-  amount: new BN(100_000_000), // 100 USDC (6 decimals)
+// Get quote via Jupiter API client
+const quoteResponse = await client.jupiterSwap.jupApi.getQuoteResponse({
+  inputMint: USDC.toBase58(),
+  outputMint: WSOL.toBase58(),
+  amount: 100_000_000, // 100 USDC (6 decimals)
   slippageBps: 50,
 });
 
-console.log("Expected output:", quote.outAmount.toString());
+console.log("Expected output:", quoteResponse.outAmount);
 
-// Execute swap
-const txId = await client.jupiterSwap.swap(vaultPda, {
-  inputMint: COMMON_MINTS.USDC,
-  outputMint: COMMON_MINTS.SOL,
-  amount: new BN(100_000_000),
-  slippageBps: 50,
+// Execute swap using quoteResponse
+const txId = await client.jupiterSwap.swap({ quoteResponse });
+
+// Or execute swap using quoteParams (fetches quote automatically)
+const txId2 = await client.jupiterSwap.swap({
+  quoteParams: {
+    inputMint: USDC.toBase58(),
+    outputMint: WSOL.toBase58(),
+    amount: 100_000_000,
+    slippageBps: 50,
+  },
 });
 ```
 
@@ -119,26 +132,51 @@ glam-cli delegate grant <OTHER_DELEGATE> Deposit Withdraw Borrow Repay --protoco
 ### Set Up Delegate Permissions (SDK)
 
 ```typescript
-// Grant trading permissions (protocol-scoped)
-await client.access.grantDelegatePermissions(vaultPda, {
-  delegate: new PublicKey("<DELEGATE_PUBKEY>"),
-  permissions: [
-    "SwapAny",
-    "DriftDeposit",
-    "DriftWithdraw",
-    "DriftCreateModifyOrders",
-    "DriftCancelOrders",
-    "DriftPerpMarkets",
-    "DriftSpotMarkets",
-  ],
-});
+import { BN } from "@coral-xyz/anchor";
+import {
+  GlamClient,
+  getProgramAndBitflagByProtocolName,
+  getProtocolsAndPermissions,
+} from "@glamsystems/glam-sdk";
+import { PublicKey } from "@solana/web3.js";
 
-// List all delegates
-const delegates = await client.access.listDelegates(vaultPda);
-for (const delegate of delegates) {
-  console.log("Delegate:", delegate.pubkey.toBase58());
-  console.log("Permissions:", delegate.permissions.join(", "));
-}
+// Look up protocol program IDs and bitflags
+const perms = getProgramAndBitflagByProtocolName();
+const protocols = getProtocolsAndPermissions();
+
+// Grant Jupiter SwapAny permission to a delegate
+// JupiterSwap permissions: SwapAny=1, SwapLST=2, SwapAllowlisted=4
+const [jupProgram, jupBitflag] = perms["JupiterSwap"];
+await client.access.grantDelegatePermissions(
+  new PublicKey("Delegate111111111111111111111111"), // delegate pubkey
+  new PublicKey(jupProgram),
+  parseInt(jupBitflag, 2),
+  new BN(1), // SwapAny = 1 << 0
+);
+
+// Grant Drift trading permissions (Deposit + Withdraw + CreateModifyOrders + CancelOrders + PerpMarkets)
+// DriftProtocol permissions: InitUser=1, UpdateUser=2, DeleteUser=4, Deposit=8,
+//   Withdraw=16, Borrow=32, Repay=64, CreateModifyOrders=128, CancelOrders=256,
+//   PerpMarkets=512, SpotMarkets=1024
+const [driftProgram, driftBitflag] = perms["DriftProtocol"];
+const driftPermissions = (1 << 3) | (1 << 4) | (1 << 7) | (1 << 8) | (1 << 9);
+await client.access.grantDelegatePermissions(
+  new PublicKey("Delegate111111111111111111111111"),
+  new PublicKey(driftProgram),
+  parseInt(driftBitflag, 2),
+  new BN(driftPermissions),
+);
+
+// Grant Kamino Deposit + Withdraw + Borrow + Repay
+// KaminoLend permissions: Init=1, Deposit=2, Withdraw=4, Borrow=8, Repay=16
+const [kaminoProgram, kaminoBitflag] = perms["KaminoLend"];
+const kaminoPermissions = (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4);
+await client.access.grantDelegatePermissions(
+  new PublicKey("Delegate211111111111111111111111"),
+  new PublicKey(kaminoProgram),
+  parseInt(kaminoBitflag, 2),
+  new BN(kaminoPermissions),
+);
 ```
 
 ### Deposit to Kamino Lending (CLI)
@@ -148,7 +186,7 @@ for (const delegate of delegates) {
 glam-cli integration enable KaminoLend
 
 # 2. Initialize Kamino for vault
-glam-cli kamino-lend init --yes
+glam-cli kamino-lend init
 
 # 3. Deposit USDC to main market
 glam-cli kamino-lend deposit \
@@ -163,24 +201,36 @@ glam-cli kamino-lend list
 ### Deposit to Kamino Lending (SDK)
 
 ```typescript
-// Enable and initialize
+// Enable Kamino protocol
 const perms = getProgramAndBitflagByProtocolName();
 const [kaminoProgram, kaminoBitflag] = perms["KaminoLend"];
-await client.access.enableProtocols(vaultPda, kaminoProgram, parseInt(kaminoBitflag, 2));
-await client.kaminoLending.initUserMetadata(vaultPda);
+await client.access.enableProtocols(
+  new PublicKey(kaminoProgram),
+  parseInt(kaminoBitflag, 2),
+);
 
-// Deposit
-const KAMINO_MAIN_MARKET = new PublicKey("7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF");
+// Initialize Kamino user metadata
+await client.kaminoLending.initUserMetadata();
 
-await client.kaminoLending.deposit(vaultPda, {
-  market: KAMINO_MAIN_MARKET,
-  mint: COMMON_MINTS.USDC,
-  amount: new BN(1000_000_000), // 1000 USDC
-});
+// Deposit USDC to Kamino main market
+const KAMINO_MAIN_MARKET = new PublicKey(
+  "7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF",
+);
 
-// Check positions
-const positions = await client.kaminoLending.getPositions(vaultPda);
-console.log("Lending positions:", positions);
+await client.kaminoLending.deposit(
+  KAMINO_MAIN_MARKET,
+  USDC,
+  new BN(1000_000_000), // 1000 USDC (6 decimals)
+);
+
+// Check positions by parsing obligations
+const obligations = await client.kaminoLending.findAndParseObligations(
+  client.vaultPda,
+);
+for (const obligation of obligations) {
+  console.log("Deposits:", obligation.activeDeposits);
+  console.log("Borrows:", obligation.activeBorrows);
+}
 ```
 
 ### Open Drift Perpetual Position (CLI)
@@ -192,10 +242,10 @@ glam-cli integration enable DriftProtocol
 # 2. Initialize Drift user
 glam-cli drift-protocol init-user --yes
 
-# 3. Deposit USDC as collateral
+# 3. Deposit USDC as collateral (market_index 0 = USDC)
 glam-cli drift-protocol deposit 0 1000 --yes
 
-# 4. Open 1 SOL-PERP long
+# 4. Open 1 SOL-PERP long (market_index 0 = SOL-PERP, price_limit 0 = market order)
 glam-cli drift-protocol perp long 0 1 0 --yes
 
 # 5. View positions
@@ -237,49 +287,59 @@ glam-cli timelock set 86400 --yes
 ### Create Tokenized Vault (SDK)
 
 ```typescript
-import { GlamClient, COMMON_MINTS, getProgramAndBitflagByProtocolName } from "@glamsystems/glam-sdk";
+import {
+  GlamClient,
+  WSOL,
+  USDC,
+  StateAccountType,
+  getProgramAndBitflagByProtocolName,
+  stringToChars,
+} from "@glamsystems/glam-sdk";
 import { BN } from "@coral-xyz/anchor";
+import { PublicKey } from "@solana/web3.js";
 
 const client = new GlamClient({ wallet });
 
-// Create vault with share class
-const { vaultPda } = await client.vault.create({
-  name: "GLAM Alpha Fund",
-  shareClassName: "Alpha Shares",
-  shareClassSymbol: "ALPHA",
-  shareClassDecimals: 6,
-  assets: [COMMON_MINTS.SOL, COMMON_MINTS.USDC],
+// Create tokenized vault
+const txId = await client.state.initialize({
+  accountType: StateAccountType.TOKENIZED_VAULT,
+  name: stringToChars("GLAM Alpha Fund"),
+  baseAssetMint: USDC,
+  assets: [WSOL, USDC],
 });
+
+console.log("Vault created:", client.statePda.toBase58());
 
 // Enable integrations
 const perms = getProgramAndBitflagByProtocolName();
 for (const name of ["JupiterSwap", "DriftProtocol", "KaminoLend"]) {
   const [program, bitflag] = perms[name];
-  await client.access.enableProtocols(vaultPda, program, parseInt(bitflag, 2));
+  await client.access.enableProtocols(
+    new PublicKey(program),
+    parseInt(bitflag, 2),
+  );
 }
 
-// Set initial price
-await client.fees.setPrice(vaultPda, {
-  shareClassIndex: 0,
-  price: new BN(1_000_000), // 1.0 USDC (6 decimals)
-});
+// Grant trading delegate permissions
+const traderPubkey = new PublicKey("Delegate111111111111111111111111");
 
-// Configure trading delegate
-await client.access.grantDelegatePermissions(vaultPda, {
-  delegate: traderPubkey,
-  permissions: [
-    "SwapAny",
-    "DriftDeposit",
-    "DriftWithdraw",
-    "DriftCreateModifyOrders",
-    "DriftPerpMarkets",
-  ],
-});
+// Jupiter SwapAny
+const [jupProgram, jupBitflag] = perms["JupiterSwap"];
+await client.access.grantDelegatePermissions(
+  traderPubkey,
+  new PublicKey(jupProgram),
+  parseInt(jupBitflag, 2),
+  new BN(1), // SwapAny
+);
 
-// Set swap policy
-await client.jupiterSwap.setMaxSlippage(vaultPda, 100); // 1%
-await client.jupiterSwap.allowlistToken(vaultPda, COMMON_MINTS.SOL);
-await client.jupiterSwap.allowlistToken(vaultPda, COMMON_MINTS.USDC);
+// Drift Deposit + Withdraw + CreateModifyOrders + PerpMarkets
+const [driftProgram, driftBitflag] = perms["DriftProtocol"];
+await client.access.grantDelegatePermissions(
+  traderPubkey,
+  new PublicKey(driftProgram),
+  parseInt(driftBitflag, 2),
+  new BN((1 << 3) | (1 << 4) | (1 << 7) | (1 << 9)),
+);
 ```
 
 ### Multi-Protocol Yield Strategy (CLI)
@@ -333,6 +393,35 @@ glam-cli invest redeem 100 --yes
 glam-cli invest claim-redemption
 ```
 
+### Investor Subscription Flow (SDK)
+
+```typescript
+import { BN } from "@coral-xyz/anchor";
+
+// Subscribe to vault (amount in base asset units)
+const subscribeTx = await client.invest.subscribe(
+  new BN(1000_000_000), // 1000 USDC (6 decimals)
+);
+
+// Or use queued subscription
+const queuedTx = await client.invest.subscribe(
+  new BN(1000_000_000),
+  true, // queued = true
+);
+
+// Manager fulfills pending requests
+await client.invest.fulfill(null); // null = no limit
+
+// Claim shares after fulfillment
+await client.invest.claim();
+
+// Redeem shares
+await client.invest.queuedRedeem(new BN(100_000_000)); // 100 shares
+
+// Cancel pending request
+await client.invest.cancel();
+```
+
 ### Cross-Chain USDC Bridge (CLI)
 
 ```bash
@@ -351,49 +440,53 @@ glam-cli cctp receive <SOURCE_DOMAIN> --txHash <TX_HASH>
 ### Full Vault Management Script (SDK)
 
 ```typescript
-import { GlamClient, COMMON_MINTS } from "@glamsystems/glam-sdk";
+import { GlamClient, WSOL, USDC } from "@glamsystems/glam-sdk";
 import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 
 async function manageVault() {
-  const client = new GlamClient({ wallet });
-  const vaultPda = new PublicKey("<VAULT_STATE_PUBKEY>");
+  // Initialize client with existing vault
+  const client = new GlamClient({
+    wallet,
+    statePda: new PublicKey("Vault111111111111111111111111111"),
+  });
 
   // Get current state
-  const state = await client.vault.fetch(vaultPda);
-  console.log("Vault:", state.name);
-  console.log("Integrations:", state.integrations);
+  const stateModel = await client.fetchStateModel();
+  console.log("Vault:", stateModel.nameStr);
 
   // Get balances
-  const balances = await client.vault.getBalances(vaultPda);
-  for (const bal of balances) {
-    console.log(`${bal.mint.toBase58()}: ${bal.amount.toString()}`);
-  }
+  const solBalance = await client.getVaultBalance();
+  console.log("SOL balance:", solBalance);
 
-  // Rebalance if needed
-  const usdcBalance = balances.find(
-    b => b.mint.toBase58() === COMMON_MINTS.USDC.toBase58()
-  );
+  const usdcBalance = await client.getVaultTokenBalance(USDC);
+  console.log("USDC balance:", usdcBalance.uiAmount);
 
-  if (usdcBalance && usdcBalance.amount.gt(new BN(10000_000_000))) {
-    // Swap excess USDC to SOL
+  // Rebalance: swap excess USDC to SOL if needed
+  if (usdcBalance.amount.gt(new BN(10000_000_000))) {
     const excessAmount = usdcBalance.amount.sub(new BN(5000_000_000));
-    await client.jupiterSwap.swap(vaultPda, {
-      inputMint: COMMON_MINTS.USDC,
-      outputMint: COMMON_MINTS.SOL,
-      amount: excessAmount,
-      slippageBps: 50,
+    await client.jupiterSwap.swap({
+      quoteParams: {
+        inputMint: USDC.toBase58(),
+        outputMint: WSOL.toBase58(),
+        amount: excessAmount.toNumber(),
+        slippageBps: 50,
+      },
     });
     console.log("Rebalanced vault");
   }
 
-  // Check lending positions
-  const lendingPositions = await client.kaminoLending.getPositions(vaultPda);
-  console.log("Lending positions:", lendingPositions);
+  // Check Kamino lending positions
+  const obligations = await client.kaminoLending.findAndParseObligations(
+    client.vaultPda,
+  );
+  console.log("Lending positions:", obligations.length);
 
   // Check Drift positions
-  const driftPositions = await client.drift.getPositions(vaultPda);
-  console.log("Drift positions:", driftPositions);
+  const driftUser = await client.drift.fetchAndParseDriftUser(0);
+  if (driftUser) {
+    console.log("Drift user:", driftUser);
+  }
 }
 
 manageVault().catch(console.error);

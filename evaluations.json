@@ -10,7 +10,11 @@
         "Uses glam-cli vault set to set the active vault after creation",
         "Uses glam-cli integration enable JupiterSwap"
       ],
-      "tags": ["basic", "vault", "cli"]
+      "tags": [
+        "basic",
+        "vault",
+        "cli"
+      ]
     },
     {
       "name": "token-swap-jupiter",
@@ -23,7 +27,12 @@
         "Uses SOL address So11111111111111111111111111111111111111112 as to",
         "Uses --slippage-bps 100 (100 basis points = 1%)"
       ],
-      "tags": ["intermediate", "jupiter", "swap", "cli"]
+      "tags": [
+        "intermediate",
+        "jupiter",
+        "swap",
+        "cli"
+      ]
     },
     {
       "name": "delegate-setup",
@@ -35,7 +44,12 @@
         "Grants Drift permissions (Deposit, Withdraw, CreateModifyOrders, CancelOrders) with --protocol DriftProtocol",
         "Uses separate grant commands per protocol"
       ],
-      "tags": ["intermediate", "delegates", "access-control", "cli"]
+      "tags": [
+        "intermediate",
+        "delegates",
+        "access-control",
+        "cli"
+      ]
     },
     {
       "name": "tokenized-vault-workflow",
@@ -48,7 +62,12 @@
         "Uses glam-cli delegate grant with --protocol flag for delegate setup",
         "Explains the subscription/redemption workflow"
       ],
-      "tags": ["advanced", "tokenized", "workflow", "cli"]
+      "tags": [
+        "advanced",
+        "tokenized",
+        "workflow",
+        "cli"
+      ]
     },
     {
       "name": "kamino-lending-deposit",
@@ -61,20 +80,29 @@
         "Uses USDC mint address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v as asset",
         "Specifies 1000 as amount"
       ],
-      "tags": ["intermediate", "kamino", "lending", "cli"]
+      "tags": [
+        "intermediate",
+        "kamino",
+        "lending",
+        "cli"
+      ]
     },
     {
       "name": "sdk-vault-creation",
       "description": "Create vault using TypeScript SDK",
       "prompt": "Show me how to create a GLAM vault programmatically using the TypeScript SDK with SOL and USDC assets.",
       "expectedBehaviors": [
-        "Imports GlamClient and COMMON_MINTS from @glamsystems/glam-sdk",
-        "Creates GlamClient instance with wallet (or uses ANCHOR_PROVIDER_URL/ANCHOR_WALLET env vars)",
-        "Calls client.vault.create() with name and assets array",
-        "Shows how to get vaultPda from result",
-        "Uses COMMON_MINTS.SOL and COMMON_MINTS.USDC for mint addresses"
+        "Imports GlamClient, StateAccountType, stringToChars, and token constants (WSOL, USDC) from @glamsystems/glam-sdk",
+        "Creates GlamClient instance with wallet config",
+        "Calls client.state.initialize() with accountType (StateAccountType.VAULT), name (via stringToChars), and baseAssetMint",
+        "Accesses the created vault PDA via client.statePda after initialization",
+        "Uses WSOL and USDC constants (PublicKey objects) for mint addresses"
       ],
-      "tags": ["basic", "sdk", "typescript"]
+      "tags": [
+        "basic",
+        "sdk",
+        "typescript"
+      ]
     },
     {
       "name": "drift-perp-trading",
@@ -86,7 +114,12 @@
         "Uses glam-cli drift-protocol deposit 0 2000 (market_index 0, amount 2000)",
         "Uses glam-cli drift-protocol perp long 0 5 0 (direction, market_index, amount, price_limit)"
       ],
-      "tags": ["advanced", "drift", "perpetuals", "cli"]
+      "tags": [
+        "advanced",
+        "drift",
+        "perpetuals",
+        "cli"
+      ]
     },
     {
       "name": "staking-marinade",
@@ -94,11 +127,16 @@
       "prompt": "Stake 10 SOL from my vault using Marinade to get mSOL.",
       "expectedBehaviors": [
         "Enables Marinade integration with glam-cli integration enable Marinade",
-        "Uses NODE_ENV=development glam-cli marinade --bypass-warning stake 10",
+        "Uses glam-cli marinade --bypass-warning stake 10 --yes",
         "Explains that mSOL liquid staking token will be received",
-        "Notes that these commands require NODE_ENV=development and --bypass-warning flag"
+        "Notes that marinade commands require --bypass-warning flag (unaudited integration)"
       ],
-      "tags": ["intermediate", "staking", "marinade", "cli"]
+      "tags": [
+        "intermediate",
+        "staking",
+        "marinade",
+        "cli"
+      ]
     },
     {
       "name": "cctp-bridge",
@@ -111,7 +149,12 @@
         "Specifies the destination Ethereum address",
         "Explains the bridging process and timeline"
       ],
-      "tags": ["advanced", "cctp", "cross-chain", "cli"]
+      "tags": [
+        "advanced",
+        "cctp",
+        "cross-chain",
+        "cli"
+      ]
     },
     {
       "name": "error-recovery-unauthorized",
@@ -124,20 +167,30 @@
         "Provides glam-cli delegate grant command with --protocol flag if needed",
         "Explains the difference between owner and delegate permissions"
       ],
-      "tags": ["troubleshooting", "errors", "cli"]
+      "tags": [
+        "troubleshooting",
+        "errors",
+        "cli"
+      ]
     },
     {
       "name": "sdk-full-workflow",
       "description": "Complete SDK workflow with multiple operations",
       "prompt": "Write a TypeScript script that creates a vault, enables Jupiter, and performs a swap from SOL to USDC.",
       "expectedBehaviors": [
-        "Imports GlamClient, COMMON_MINTS, getProgramAndBitflagByProtocolName from @glamsystems/glam-sdk",
+        "Imports GlamClient, StateAccountType, stringToChars, token constants (WSOL, USDC), getProgramAndBitflagByProtocolName from @glamsystems/glam-sdk",
         "Creates GlamClient with wallet configuration",
-        "Uses client.vault.create() then client.access.enableProtocols() with getProgramAndBitflagByProtocolName()",
-        "Calls client.jupiterSwap.swap() with inputMint, outputMint, amount, slippageBps",
+        "Uses client.state.initialize() with StateAccountType.VAULT, stringToChars for name, and baseAssetMint",
+        "Uses getProgramAndBitflagByProtocolName() then client.access.enableProtocols(new PublicKey(program), parseInt(bitflag, 2))",
+        "Calls client.jupiterSwap.swap({ quoteParams: { inputMint, outputMint, amount, slippageBps } })",
         "Handles async/await properly and uses BN for amounts"
       ],
-      "tags": ["advanced", "sdk", "typescript", "workflow"]
+      "tags": [
+        "advanced",
+        "sdk",
+        "typescript",
+        "workflow"
+      ]
     },
     {
       "name": "multi-protocol-strategy",
@@ -148,22 +201,32 @@
         "Initializes Kamino with glam-cli kamino-lend init",
         "Deposits USDC with glam-cli kamino-lend deposit <market> <asset> <amount>",
         "Borrows SOL with glam-cli kamino-lend borrow <market> <asset> <amount>",
-        "Stakes SOL with NODE_ENV=development glam-cli marinade --bypass-warning stake <amount>",
+        "Stakes SOL with glam-cli marinade --bypass-warning stake <amount>",
         "Explains the leverage/risk involved in this strategy"
       ],
-      "tags": ["advanced", "multi-protocol", "strategy", "cli"]
+      "tags": [
+        "advanced",
+        "multi-protocol",
+        "strategy",
+        "cli"
+      ]
     },
     {
       "name": "mint-operations",
       "description": "Freeze accounts and issue tokens for share class management",
       "prompt": "I need to freeze a suspicious token holder's account at address SUS111, then issue 500 new shares to a new investor at address INV222 for my tokenized vault.",
       "expectedBehaviors": [
-        "Uses SDK client.mint.setTokenAccountsStates() to freeze the account (no CLI command exists for mint operations)",
-        "Uses SDK client.mint.mint() to issue tokens to the recipient",
+        "Uses SDK client.mint.setTokenAccountsStates(tokenAccounts, frozen) to freeze the account",
+        "Uses SDK client.mint.mint(to, amount) to issue tokens to the recipient",
         "Explains that frozen accounts cannot transfer tokens",
         "Uses SDK client.mint.fetchTokenHolders() to view current holders"
       ],
-      "tags": ["intermediate", "mint", "compliance", "sdk"]
+      "tags": [
+        "intermediate",
+        "mint",
+        "compliance",
+        "sdk"
+      ]
     },
     {
       "name": "policy-management",
@@ -175,7 +238,12 @@
         "Mentions that market allowlist restricts which markets can be traded",
         "Notes the perp type prefix for allowlist-market command"
       ],
-      "tags": ["intermediate", "policy", "drift", "cli"]
+      "tags": [
+        "intermediate",
+        "policy",
+        "drift",
+        "cli"
+      ]
     },
     {
       "name": "transfer-workflow",
@@ -183,11 +251,16 @@
       "prompt": "I need to transfer 500 USDC from my vault to address DEST789. Walk me through the complete process.",
       "expectedBehaviors": [
         "Uses glam-cli transfer view-policy to check current allowlist",
-        "Uses glam-cli transfer allowlist-destination to add the destination",
-        "Uses glam-cli transfer command with amount, destination, and token flag",
-        "Uses USDC mint address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        "Uses glam-cli transfer allowlist-destination <pubkey> to add the destination",
+        "Uses glam-cli transfer <amount> <to> --token <mint> with USDC mint address",
+        "Uses USDC mint address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v for --token flag"
       ],
-      "tags": ["intermediate", "transfer", "workflow", "cli"]
+      "tags": [
+        "intermediate",
+        "transfer",
+        "workflow",
+        "cli"
+      ]
     },
     {
       "name": "fee-management",
@@ -199,7 +272,12 @@
         "Uses glam-cli manage claim-fees to claim fees",
         "Explains the correct order of operations (price before fulfill)"
       ],
-      "tags": ["intermediate", "fees", "manage", "cli"]
+      "tags": [
+        "intermediate",
+        "fees",
+        "manage",
+        "cli"
+      ]
     },
     {
       "name": "sdk-multisig",
@@ -209,11 +287,16 @@
         "Imports GlamClient and getProgramAndBitflagByProtocolName from SDK",
         "Imports multisig from @sqds/multisig",
         "Uses getProgramAndBitflagByProtocolName to get Jupiter program and bitflag",
-        "Uses glamClient.access.txBuilder.enableDisableProtocolsIx() to build instruction",
+        "Uses glamClient.access.txBuilder.enableDisableProtocolsTx() to build the versioned transaction",
         "Wraps GLAM instruction in Squads vault transaction and proposal",
-        "Uses intoVersionedTransaction and sendAndConfirm helpers"
+        "Uses sendAndConfirm for the Squads transaction"
       ],
-      "tags": ["advanced", "sdk", "multisig", "typescript"]
+      "tags": [
+        "advanced",
+        "sdk",
+        "multisig",
+        "typescript"
+      ]
     }
   ]
 }

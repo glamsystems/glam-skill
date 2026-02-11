@@ -97,7 +97,7 @@ glam-cli drift-vaults cancel-withdraw <DRIFT_VAULT_ADDRESS> [--yes]
 Claim withdrawal after the delay period has passed.
 
 ```bash
-glam-cli drift-vaults withdraw <DRIFT_VAULT_ADDRESS> [--yes]
+glam-cli drift-vaults withdraw <DRIFT_VAULT_ADDRESS>
 ```
 
 ---

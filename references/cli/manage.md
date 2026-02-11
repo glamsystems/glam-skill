@@ -95,6 +95,37 @@ glam-cli manage unpause <ACTION> [--yes]
 glam-cli manage unpause subscription
 ```
 
+### `glam-cli manage list-requests`
+
+List pending user requests in the subscription/redemption queue.
+
+```bash
+glam-cli manage list-requests
+```
+
+**Output shows:**
+- User public key
+- Request type (subscription or redemption)
+- Incoming/outgoing amounts
+- Status (pending or fulfilled/claimable)
+- Created timestamp
+
+### `glam-cli manage cancel-for-user`
+
+Cancel a queued request on behalf of a user.
+
+```bash
+glam-cli manage cancel-for-user <pubkey> [--yes]
+```
+
+### `glam-cli manage claim-for-user`
+
+Claim a fulfilled request on behalf of a user.
+
+```bash
+glam-cli manage claim-for-user <pubkey> [--yes]
+```
+
 ---
 
 ## Manager Workflow

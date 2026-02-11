@@ -15,7 +15,7 @@ glam-cli integration enable KaminoLend
 Initialize Kamino lending for vault. **Required before any Kamino operations.**
 
 ```bash
-glam-cli kamino-lend init [--yes]
+glam-cli kamino-lend init
 ```
 
 ### `glam-cli kamino-lend deposit`
