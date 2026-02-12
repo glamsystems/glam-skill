@@ -82,14 +82,16 @@ glam-cli kamino-lend deposit \
 ## Decision Tree
 
 | Goal                | Integration          | Command                                                                                     |
-| ------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
+|---------------------| -------------------- | ------------------------------------------------------------------------------------------- |
 | Swap tokens         | `JupiterSwap`        | `jupiter swap`                                                                              |
 | Lend for yield      | `KaminoLend`         | `kamino-lend deposit`                                                                       |
-| Stake SOL           | `Marinade` (staging) | `marinade --bypass-warning stake`                                                           |
+| Stake SOL (liquid)  | `Marinade` (staging)                                      | `marinade --bypass-warning stake`                                                           |
+| Stake SOL (LST)     | `StakePool` / `SanctumSingle` / `SanctumMulti` (staging) | `lst --bypass-warning stake <pool> <amount>`                                                |
+| Stake SOL (native)  | `StakeProgram` (staging)                                  | `stake --bypass-warning list / deactivate / withdraw`                                       |
 | Kamino vaults       | `KaminoVaults`       | `kamino-vaults deposit`                                                                     |
 | Drift vaults        | `DriftVaults`        | `drift-vaults deposit`                                                                      |
 | Trade perps         | `DriftProtocol`      | `drift-protocol init-user` → `deposit` → `perp`                                             |
-| Trade spot (Drift)  | `DriftProtocol`      | `drift-protocol init-user` → `deposit` → `spot`                                             |
+| Trade spot          | `DriftProtocol`      | `drift-protocol init-user` → `deposit` → `spot`                                             |
 | Tokenized vault     | —                    | `vault create` → `manage price` → investors `invest subscribe`                              |
 | Manage share tokens | —                    | SDK only: `client.mint.*` (freeze, issue, burn, forceTransfer)                              |
 | Bridge USDC         | `CCTP`               | `cctp bridge-usdc <amount> <domain> <dest>` (0=ETH, 1=AVAX, 2=OP, 3=ARB, 6=BASE, 7=POLYGON) |
