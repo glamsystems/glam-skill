@@ -162,11 +162,13 @@ await client.jupiterSwap.swap(vaultPda, {
 });
 ```
 
+For advanced proxy instruction remapping (convert standard Solana instructions into GLAM-proxied instructions), see the `ix-mapper` SDK reference.
+
 ---
 
 ## Reference
 
 - **CLI**: [vault](./references/cli/vault.md), [delegate](./references/cli/delegate.md), [jupiter](./references/cli/jupiter.md), [drift-protocol](./references/cli/drift-protocol.md), [kamino-lend](./references/cli/kamino-lend.md), [kamino-vaults](./references/cli/kamino-vaults.md), [kamino-farms](./references/cli/kamino-farms.md), [drift-vaults](./references/cli/drift-vaults.md), [staking](./references/cli/staking.md), [lst](./references/cli/lst.md), [invest](./references/cli/invest.md), [manage](./references/cli/manage.md), [transfer](./references/cli/transfer.md), [advanced](./references/cli/advanced.md), [alt](./references/cli/alt.md)
-- **SDK**: [client](./references/sdk/client.md), [integrations](./references/sdk/integrations.md), [mint](./references/sdk/mint.md), [multisig](./references/sdk/multisig.md)
+- **SDK**: [client](./references/sdk/client.md), [integrations](./references/sdk/integrations.md), [ix-mapper](./references/sdk/ix-mapper.md), [mint](./references/sdk/mint.md), [multisig](./references/sdk/multisig.md)
 - **Other**: [concepts](./references/concepts.md), [examples](./EXAMPLES.md), [troubleshooting](./TROUBLESHOOTING.md)
 - **Docs**: https://docs.glam.systems/
