@@ -84,7 +84,7 @@ Derives the integration authority PDA for a given proxy program.
 flowchart TD
     subgraph input["Standard Solana Instruction"]
         direction LR
-        I1["programId: Drift"]
+        I1["programId: TargetProgram"]
         I2["disc: src_discriminator"]
         I3["accounts: [user, market, vault, ...]"]
         I4["data: payload"]
@@ -114,7 +114,7 @@ flowchart TD
 
     subgraph output["GLAM Proxy Instruction"]
         direction LR
-        O1["programId: ext_drift"]
+        O1["programId: ext_integration"]
         O2["disc: dst_discriminator"]
         O3["accounts: [state, vault, signer, auth, ..., user, market, ...]"]
         O4["data: payload (unchanged)"]
